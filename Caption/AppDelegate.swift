@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func showRootVC() {
         
-        let vc = VideoPlayerViewController()
+        let vc = CaptureViewController()
         let nav = UINavigationController(rootViewController: vc)
         
         let rootVC:UIViewController = nav

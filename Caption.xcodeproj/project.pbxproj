@@ -10,6 +10,9 @@
 		719BD6B46D3E7E2FB78E977E /* Pods_Caption.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BDC63231BADF122FF75D21F /* Pods_Caption.framework */; };
 		9771DBA025AC27F200EA7239 /* CaptureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */; };
 		9771DBA825AC291600EA7239 /* VideoPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */; };
+		9771DBC925AC38A500EA7239 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBC825AC38A500EA7239 /* Toast.swift */; };
+		9771DBCE25AC3A5D00EA7239 /* UIFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBCD25AC3A5D00EA7239 /* UIFunc.swift */; };
+		9771DBD325AC3B8200EA7239 /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBD225AC3B8200EA7239 /* UIColorExtension.swift */; };
 		97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97766D9225AAEB83003AF31D /* AppDelegate.swift */; };
 		97766D9C25AAEB85003AF31D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9B25AAEB85003AF31D /* Assets.xcassets */; };
 		97766D9F25AAEB85003AF31D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9D25AAEB85003AF31D /* LaunchScreen.storyboard */; };
@@ -40,6 +43,9 @@
 		716D58AFE78F458173831528 /* Pods-Caption.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Caption.release.xcconfig"; path = "Target Support Files/Pods-Caption/Pods-Caption.release.xcconfig"; sourceTree = "<group>"; };
 		9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureViewController.swift; sourceTree = "<group>"; };
 		9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewController.swift; sourceTree = "<group>"; };
+		9771DBC825AC38A500EA7239 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
+		9771DBCD25AC3A5D00EA7239 /* UIFunc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIFunc.swift; sourceTree = "<group>"; };
+		9771DBD225AC3B8200EA7239 /* UIColorExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		97766D8F25AAEB83003AF31D /* Caption.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Caption.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97766D9225AAEB83003AF31D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		97766D9B25AAEB85003AF31D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -115,6 +121,9 @@
 				97766D9225AAEB83003AF31D /* AppDelegate.swift */,
 				9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */,
 				9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */,
+				9771DBC825AC38A500EA7239 /* Toast.swift */,
+				9771DBCD25AC3A5D00EA7239 /* UIFunc.swift */,
+				9771DBD225AC3B8200EA7239 /* UIColorExtension.swift */,
 				97766D9B25AAEB85003AF31D /* Assets.xcassets */,
 				97766D9D25AAEB85003AF31D /* LaunchScreen.storyboard */,
 				97766DA025AAEB85003AF31D /* Info.plist */,
@@ -323,8 +332,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				9771DBA825AC291600EA7239 /* VideoPlayerViewController.swift in Sources */,
+				9771DBC925AC38A500EA7239 /* Toast.swift in Sources */,
+				9771DBCE25AC3A5D00EA7239 /* UIFunc.swift in Sources */,
 				9771DBA025AC27F200EA7239 /* CaptureViewController.swift in Sources */,
 				97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */,
+				9771DBD325AC3B8200EA7239 /* UIColorExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
