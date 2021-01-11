@@ -6,13 +6,14 @@
 //
 
 import UIKit
+import AVFoundation
 
 class VideoPlayerViewController: UIViewController {
     
-    var videoURL: NSURL
+    private var playerControlloer: PlayerController
     
-    init(videoURL: NSURL) {
-        self.videoURL = videoURL
+    init(videoURL: URL) {
+        self.playerControlloer = PlayerController(URL: videoURL)
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -26,10 +27,19 @@ class VideoPlayerViewController: UIViewController {
 
         // Do any additional setup after loading the view.
         
-        view.backgroundColor = .blue
+        view.backgroundColor = .white
+        
+        configPlayerViews()
+    }
+    
+    private func configPlayerViews() {
+        
+        let playerView = self.playerControlloer.playerView
+        self.view.addSubview(playerView)
+        playerView.snp.makeConstraints { (maker) in
+            maker.edges.equalToSuperview().inset(UIEdgeInsets(top: 100, left: 20, bottom: 40, right: 20))
+        }
         
     }
     
-    
-
 }

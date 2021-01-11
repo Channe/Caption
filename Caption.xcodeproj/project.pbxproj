@@ -13,6 +13,8 @@
 		9771DBC925AC38A500EA7239 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBC825AC38A500EA7239 /* Toast.swift */; };
 		9771DBCE25AC3A5D00EA7239 /* UIFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBCD25AC3A5D00EA7239 /* UIFunc.swift */; };
 		9771DBD325AC3B8200EA7239 /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBD225AC3B8200EA7239 /* UIColorExtension.swift */; };
+		9771DBD825AC5ACE00EA7239 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBD725AC5ACE00EA7239 /* PlayerView.swift */; };
+		9771DBDD25AC74B000EA7239 /* PlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBDC25AC74B000EA7239 /* PlayerController.swift */; };
 		97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97766D9225AAEB83003AF31D /* AppDelegate.swift */; };
 		97766D9C25AAEB85003AF31D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9B25AAEB85003AF31D /* Assets.xcassets */; };
 		97766D9F25AAEB85003AF31D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9D25AAEB85003AF31D /* LaunchScreen.storyboard */; };
@@ -46,6 +48,8 @@
 		9771DBC825AC38A500EA7239 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		9771DBCD25AC3A5D00EA7239 /* UIFunc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIFunc.swift; sourceTree = "<group>"; };
 		9771DBD225AC3B8200EA7239 /* UIColorExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
+		9771DBD725AC5ACE00EA7239 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		9771DBDC25AC74B000EA7239 /* PlayerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerController.swift; sourceTree = "<group>"; };
 		97766D8F25AAEB83003AF31D /* Caption.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Caption.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97766D9225AAEB83003AF31D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		97766D9B25AAEB85003AF31D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -121,6 +125,8 @@
 				97766D9225AAEB83003AF31D /* AppDelegate.swift */,
 				9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */,
 				9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */,
+				9771DBDC25AC74B000EA7239 /* PlayerController.swift */,
+				9771DBD725AC5ACE00EA7239 /* PlayerView.swift */,
 				9771DBC825AC38A500EA7239 /* Toast.swift */,
 				9771DBCD25AC3A5D00EA7239 /* UIFunc.swift */,
 				9771DBD225AC3B8200EA7239 /* UIColorExtension.swift */,
@@ -333,6 +339,8 @@
 			files = (
 				9771DBA825AC291600EA7239 /* VideoPlayerViewController.swift in Sources */,
 				9771DBC925AC38A500EA7239 /* Toast.swift in Sources */,
+				9771DBDD25AC74B000EA7239 /* PlayerController.swift in Sources */,
+				9771DBD825AC5ACE00EA7239 /* PlayerView.swift in Sources */,
 				9771DBCE25AC3A5D00EA7239 /* UIFunc.swift in Sources */,
 				9771DBA025AC27F200EA7239 /* CaptureViewController.swift in Sources */,
 				97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */,

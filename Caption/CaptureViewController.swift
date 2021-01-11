@@ -7,6 +7,7 @@
 
 import UIKit
 import MobileCoreServices
+import Photos
 
 class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
@@ -61,12 +62,12 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     
     @objc private func nextBtnAction() {
         
-        guard let videoURL = mediaURL else {
+        guard let urlString = mediaURL?.absoluteString else {
             Toast.showTips("Please select video first")
             return
         }
         
-        let videoPlayerVC = VideoPlayerViewController(videoURL: videoURL)
+        let videoPlayerVC = VideoPlayerViewController(videoURL: URL(fileURLWithPath: urlString))
         
         self.navigationController?.pushViewController(videoPlayerVC, animated: true)
     }
@@ -81,7 +82,6 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         guard let mediaURL = info[UIImagePickerController.InfoKey.mediaURL] as? NSURL else {
             return
         }
-        // file:///Users/qian/Library/Developer/CoreSimulator/Devices/F33A8D73-40F3-48A9-A50A-14DF07F18FD4/data/Containers/Data/PluginKitPlugin/38BAA803-5033-4D97-A17A-297B58BE58D1/tmp/trim.D3E9E5B6-A78A-4C68-955B-D5E2B0A34A57.MOV
         print(mediaURL)
         self.mediaURL = mediaURL
         
