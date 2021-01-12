@@ -32,7 +32,8 @@ class VideoPlayerViewController: UIViewController {
         
         configPlayerViews()
         
-        self.captionGenerator.start()
+//        self.captionGenerator.start()
+        self.captionGenerator.startFromFile()
     }
     
     private func configPlayerViews() {

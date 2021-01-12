@@ -13,6 +13,7 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))!
     
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    private var recognitionFileRequest: SFSpeechURLRecognitionRequest?
     
     private var recognitionTask: SFSpeechRecognitionTask?
     
@@ -57,9 +58,7 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
     func start() {
         self.recognitionTask?.cancel()
         self.recognitionTask = nil
-        
-//        let audioSession = AVAudioSession.sharedInstance()
-        
+                
         guard FileManager.default.fileExists(atPath: self.videoURL.path) else {
             print("no video file.")
             return
@@ -108,12 +107,69 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
             }
             
             if error != nil || isFinal {
+                print("speech recognizer...")
                 print(error?.localizedDescription ?? "speech recognizer is completed.")
                 
-                self.recognitionRequest?.endAudio()
-                self.recognitionTask?.cancel()
-                self.recognitionRequest = nil
-                self.recognitionTask = nil
+                DispatchQueue.main.async {
+                    self.recognitionRequest?.endAudio()
+                    self.recognitionTask?.cancel()
+                    self.recognitionRequest = nil
+                    self.recognitionTask = nil
+                }
+                
+            }
+            
+        })
+    }
+    
+    func startFromFile() {
+        self.recognitionTask?.cancel()
+        self.recognitionTask = nil
+        
+        guard FileManager.default.fileExists(atPath: self.videoURL.path) else {
+            print("no video file.")
+            return
+        }
+        
+        self.recognitionFileRequest = SFSpeechURLRecognitionRequest(url: self.videoURL)
+        
+        let recognitionRequest = self.recognitionFileRequest!
+        
+        recognitionRequest.shouldReportPartialResults = true
+        
+        // 在线语音识别效果比离线更好
+        if #available(iOS 13, *) {
+            recognitionRequest.requiresOnDeviceRecognition = true
+        }
+        
+        self.recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest, resultHandler: { [weak self](result, error) in
+            guard let self = self else { return }
+            
+            var isFinal = false
+            
+            if let result = result {
+                let string = result.bestTranscription.formattedString
+                isFinal = result.isFinal
+                print("Text --------:")
+                print(string)
+                
+                if isFinal {
+                    //TODO: qianlei 一直没有触发
+                    print("isFinal Text --------:")
+                    print(string)
+                }
+            }
+            
+            if error != nil || isFinal {
+                print("speech recognizer...")
+                print(error?.localizedDescription ?? "speech recognizer is completed.")
+                
+                DispatchQueue.main.async {
+                    self.recognitionTask?.cancel()
+                    self.recognitionFileRequest = nil
+                    self.recognitionTask = nil
+                }
+                
             }
             
         })
