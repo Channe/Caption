@@ -11,9 +11,12 @@ import AVFoundation
 class VideoPlayerViewController: UIViewController {
     
     private var playerControlloer: PlayerController
+    private var captionGenerator: AudioCaptionGenerator
     
     init(videoURL: URL) {
         self.playerControlloer = PlayerController(URL: videoURL)
+        self.captionGenerator = AudioCaptionGenerator(URL: URL(fileURLWithPath: savePath))
+//        self.captionGenerator = AudioCaptionGenerator(URL: videoURL)
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -30,6 +33,8 @@ class VideoPlayerViewController: UIViewController {
         view.backgroundColor = .white
         
         configPlayerViews()
+        
+        self.captionGenerator.start()
     }
     
     private func configPlayerViews() {

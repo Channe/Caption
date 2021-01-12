@@ -48,6 +48,7 @@ struct Toast {
     }()
     
     static func showTips(_ msg:String, duration:Double = 2) {
+        print("will showTips:\(msg)")
         guard !msg.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return
         }

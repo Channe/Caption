@@ -26,6 +26,8 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string></string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Speech Recognition for captions</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

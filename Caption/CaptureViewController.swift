@@ -9,6 +9,8 @@ import UIKit
 import MobileCoreServices
 import Photos
 
+let savePath: String = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/saved.mp4"
+
 class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     private lazy var imagePicker: UIImagePickerController = {
@@ -21,7 +23,8 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     }()
     
     private var mediaURL: NSURL? = nil
-    
+//    private var phAsset: PHAsset!
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -82,10 +85,57 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         guard let mediaURL = info[UIImagePickerController.InfoKey.mediaURL] as? NSURL else {
             return
         }
+        
         print(mediaURL)
         self.mediaURL = mediaURL
         
+        let videoURL = URL(string: mediaURL.absoluteString!)
+                
+        saveVideoToSandbox(url: videoURL)
+        
         picker.dismiss(animated: true, completion: nil)
+    }
+    
+    private func saveVideoToSandbox(url: URL?) {
+        
+        guard let videoURL = url else {
+            return
+        }
+                
+        let asset = AVAsset(url: videoURL)
+        guard asset.isExportable else {
+            print("cannot export")
+            return
+        }
+        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+            print("export session error")
+            return
+        }
+        exportSession.outputURL = URL(fileURLWithPath: savePath)
+        exportSession.outputFileType = .mp4
+        exportSession.exportAsynchronously {
+            print("export video...")
+            let status = exportSession.status
+            
+            switch status {
+            
+            case .unknown:
+                break
+            case .waiting:
+                break
+            case .exporting:
+                break
+            case .completed:
+                print("export video completed")
+            case .failed:
+                print(exportSession.error as Any)
+                print("export video failed")
+            case .cancelled:
+                break
+            @unknown default:
+                break
+            }
+        }
     }
     
 }

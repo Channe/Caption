@@ -10,7 +10,6 @@ import AVFoundation
 
 class PlayerController: NSObject {
     
-    private(set) var view: UIView?
     private var asset: AVAsset
     private var playerItem: AVPlayerItem
     private var player: AVPlayer
@@ -35,7 +34,12 @@ class PlayerController: NSObject {
         
         self.playerItem.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), options: [.old, .new], context: &PlayerItemStatusContext)
         
-
+        // 播放视频时打开声音
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+        } catch {
+            print("Setting category to AVAudioSessionCategoryPlayback failed.")
+        }
     }
     
     //MARK: - KVO
