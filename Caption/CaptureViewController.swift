@@ -101,7 +101,13 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         guard let videoURL = url else {
             return
         }
-                
+        
+        do {
+            try FileManager.default.removeItem(atPath: savePath)
+        } catch {
+            print("cannot remove exist video file")
+        }
+        
         let asset = AVAsset(url: videoURL)
         guard asset.isExportable else {
             print("cannot export")
@@ -129,6 +135,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
                 print("export video completed")
             case .failed:
                 print(exportSession.error as Any)
+                Toast.showTips(exportSession.error!.localizedDescription)
                 print("export video failed")
             case .cancelled:
                 break

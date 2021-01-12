@@ -73,6 +73,7 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
         
         recognitionRequest.shouldReportPartialResults = true
         
+        // 在线语音识别效果比离线更好
         if #available(iOS 13, *) {
             recognitionRequest.requiresOnDeviceRecognition = true
         }
@@ -86,11 +87,10 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
             sampleBuffers.forEach({ (sampleBuffer) in
                 recognitionRequest.appendAudioSampleBuffer(sampleBuffer)
             })
-            
-            recognitionRequest.endAudio()
         }
         
-        self.recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest, resultHandler: { (result, error) in
+        self.recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest, resultHandler: { [weak self](result, error) in
+            guard let self = self else { return }
             
             var isFinal = false
             
@@ -102,7 +102,9 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
             }
             
             if error != nil || isFinal {
-                print(error?.localizedDescription ?? "no error")
+                print(error?.localizedDescription ?? "speech recognizer is completed.")
+                
+                self.recognitionRequest?.endAudio()
                 self.recognitionRequest = nil
                 self.recognitionTask = nil
             }
