@@ -15,8 +15,8 @@ class VideoPlayerViewController: UIViewController {
     
     init(videoURL: URL) {
         self.playerControlloer = PlayerController(URL: videoURL)
+        //TODO: qianlei 提前进行语音转文字
         self.captionGenerator = AudioCaptionGenerator(URL: URL(fileURLWithPath: savePath))
-//        self.captionGenerator = AudioCaptionGenerator(URL: videoURL)
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -27,8 +27,6 @@ class VideoPlayerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
         
         view.backgroundColor = .white
         

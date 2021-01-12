@@ -17,18 +17,17 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         let picker = UIImagePickerController()
         picker.mediaTypes = [kUTTypeMovie as String]
         picker.sourceType = .photoLibrary
+        picker.videoMaximumDuration = 60
+        picker.allowsEditing = true
         picker.delegate = self
         
         return picker
     }()
     
     private var mediaURL: NSURL? = nil
-//    private var phAsset: PHAsset!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
         
         self.view.backgroundColor = .gray
 
@@ -89,18 +88,17 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         print(mediaURL)
         self.mediaURL = mediaURL
         
-        let videoURL = URL(string: mediaURL.absoluteString!)
-                
+        guard let videoURL = URL(string: mediaURL.absoluteString!) else {
+            picker.dismiss(animated: true, completion: nil)
+            return
+        }
+        
         saveVideoToSandbox(url: videoURL)
         
         picker.dismiss(animated: true, completion: nil)
     }
     
-    private func saveVideoToSandbox(url: URL?) {
-        
-        guard let videoURL = url else {
-            return
-        }
+    private func saveVideoToSandbox(url videoURL: URL) {
         
         do {
             try FileManager.default.removeItem(atPath: savePath)

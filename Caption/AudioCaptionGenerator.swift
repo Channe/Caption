@@ -99,12 +99,19 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
                 isFinal = result.isFinal
                 print("Text --------:")
                 print(string)
+                
+                if isFinal {
+                    //TODO: qianlei 一直没有触发
+                    print("isFinal Text --------:")
+                    print(string)
+                }
             }
             
             if error != nil || isFinal {
                 print(error?.localizedDescription ?? "speech recognizer is completed.")
                 
                 self.recognitionRequest?.endAudio()
+                self.recognitionTask?.cancel()
                 self.recognitionRequest = nil
                 self.recognitionTask = nil
             }

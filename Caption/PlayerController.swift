@@ -19,7 +19,6 @@ class PlayerController: NSObject {
         self.asset = AVAsset(url: URL)
         
         let keys = ["tracks","duration","commonMetadata"]
-//        let keys = ["playable", "hasProtectedContent"]
         
         self.playerItem = AVPlayerItem(asset: self.asset, automaticallyLoadedAssetKeys: keys)
         self.player = AVPlayer(playerItem: playerItem)
@@ -68,9 +67,6 @@ class PlayerController: NSObject {
                 Toast.showTips("Failed to load video.")
                 return
             }
-            
-            // 此时可以开始播放
-//                let duration = self.playerItem.duration
             
             self.player.play()
         }
