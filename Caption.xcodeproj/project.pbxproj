@@ -18,6 +18,8 @@
 		9771DBE225AC934B00EA7239 /* SampleDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBE125AC934B00EA7239 /* SampleDataProvider.swift */; };
 		9771DBEC25ACAB6600EA7239 /* AudioCaptionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBEB25ACAB6600EA7239 /* AudioCaptionGenerator.swift */; };
 		9771DBF125AE154C00EA7239 /* CaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBF025AE154C00EA7239 /* CaptureController.swift */; };
+		9771DC2D25AF171300EA7239 /* CircleGradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DC2C25AF171300EA7239 /* CircleGradientView.swift */; };
+		9771DC3225AF3EA900EA7239 /* SysFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DC3125AF3EA900EA7239 /* SysFunc.swift */; };
 		97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97766D9225AAEB83003AF31D /* AppDelegate.swift */; };
 		97766D9C25AAEB85003AF31D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9B25AAEB85003AF31D /* Assets.xcassets */; };
 		97766D9F25AAEB85003AF31D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9D25AAEB85003AF31D /* LaunchScreen.storyboard */; };
@@ -56,6 +58,8 @@
 		9771DBE125AC934B00EA7239 /* SampleDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataProvider.swift; sourceTree = "<group>"; };
 		9771DBEB25ACAB6600EA7239 /* AudioCaptionGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCaptionGenerator.swift; sourceTree = "<group>"; };
 		9771DBF025AE154C00EA7239 /* CaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureController.swift; sourceTree = "<group>"; };
+		9771DC2C25AF171300EA7239 /* CircleGradientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleGradientView.swift; sourceTree = "<group>"; };
+		9771DC3125AF3EA900EA7239 /* SysFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SysFunc.swift; sourceTree = "<group>"; };
 		97766D8F25AAEB83003AF31D /* Caption.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Caption.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97766D9225AAEB83003AF31D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		97766D9B25AAEB85003AF31D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -130,12 +134,14 @@
 			children = (
 				97766D9225AAEB83003AF31D /* AppDelegate.swift */,
 				9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */,
+				9771DC2C25AF171300EA7239 /* CircleGradientView.swift */,
 				9771DBF025AE154C00EA7239 /* CaptureController.swift */,
 				9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */,
 				9771DBDC25AC74B000EA7239 /* PlayerController.swift */,
 				9771DBD725AC5ACE00EA7239 /* PlayerView.swift */,
 				9771DBE125AC934B00EA7239 /* SampleDataProvider.swift */,
 				9771DBEB25ACAB6600EA7239 /* AudioCaptionGenerator.swift */,
+				9771DC3125AF3EA900EA7239 /* SysFunc.swift */,
 				9771DBC825AC38A500EA7239 /* Toast.swift */,
 				9771DBCD25AC3A5D00EA7239 /* UIFunc.swift */,
 				9771DBD225AC3B8200EA7239 /* UIColorExtension.swift */,
@@ -356,7 +362,9 @@
 				97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */,
 				9771DBEC25ACAB6600EA7239 /* AudioCaptionGenerator.swift in Sources */,
 				9771DBD325AC3B8200EA7239 /* UIColorExtension.swift in Sources */,
+				9771DC2D25AF171300EA7239 /* CircleGradientView.swift in Sources */,
 				9771DBE225AC934B00EA7239 /* SampleDataProvider.swift in Sources */,
+				9771DC3225AF3EA900EA7239 /* SysFunc.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

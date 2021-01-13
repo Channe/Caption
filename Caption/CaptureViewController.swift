@@ -23,9 +23,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         return picker
     }()
-    
-//    private var mediaURL: NSURL? = nil
-    
+        
     private var captureController: CaptureController? = nil
     
     private lazy var flashBtn: UIButton = {
@@ -186,15 +184,6 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         navigationItem.leftBarButtonItem = leftItem
         
-//        let nextBtn = UIButton(frame: CGRect(origin: .zero, size: CGSize(width: 40, height: 40)))
-//        nextBtn.setTitle("Next", for: .normal)
-//        nextBtn.setTitleColor(.black, for: .normal)
-//        nextBtn.addTarget(self, action: #selector(nextBtnAction), for: .touchUpInside)
-//
-//        let rightItem = UIBarButtonItem(customView: nextBtn)
-//
-//        navigationItem.rightBarButtonItem = rightItem
-        
     }
     
     private func showCancelBtn(_ yesOrNo: Bool) {
@@ -269,6 +258,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         if gesture.state == .began {
             // 长按开始
+            SysFunc.feedbackGenerator()
             self.captureController?.startReordingMovie()
         } else if gesture.state == .ended {
             // 长按结束
@@ -283,15 +273,9 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        
-        guard let mediaURL = info[UIImagePickerController.InfoKey.mediaURL] as? NSURL else {
-            return
-        }
 
-        print(mediaURL)
-//        self.mediaURL = mediaURL
-
-        guard let videoURL = URL(string: mediaURL.absoluteString!) else {
+        guard let mediaURL = info[UIImagePickerController.InfoKey.mediaURL] as? NSURL,
+              let videoURL = URL(string: mediaURL.absoluteString!) else {
             picker.dismiss(animated: true, completion: nil)
             return
         }
@@ -322,29 +306,27 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         exportSession.outputFileType = .mp4
         exportSession.exportAsynchronously {
             
-            DispatchQueue.main.async {
-                print("export video...")
-                let status = exportSession.status
-                
-                switch status {
-                
-                case .unknown:
-                    break
-                case .waiting:
-                    break
-                case .exporting:
-                    break
-                case .completed:
-                    print("export video completed")
-                case .failed:
-                    print(exportSession.error as Any)
-                    Toast.showTips(exportSession.error!.localizedDescription)
-                    print("export video failed")
-                case .cancelled:
-                    break
-                @unknown default:
-                    break
-                }
+            print("export video...")
+            let status = exportSession.status
+            
+            switch status {
+            
+            case .unknown:
+                break
+            case .waiting:
+                break
+            case .exporting:
+                break
+            case .completed:
+                print("export video completed")
+            case .failed:
+                print(exportSession.error as Any)
+                Toast.showTips(exportSession.error!.localizedDescription)
+                print("export video failed")
+            case .cancelled:
+                break
+            @unknown default:
+                break
             }
             
         }

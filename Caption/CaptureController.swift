@@ -16,7 +16,7 @@ class CaptureController: NSObject {
     
     private lazy var captureSession: AVCaptureSession = {
         let session = AVCaptureSession()
-        session.sessionPreset = .medium
+        session.sessionPreset = .high
         
         return session
     }()
@@ -62,6 +62,7 @@ class CaptureController: NSObject {
     private func setupSession() {
         
         // 默认是前置摄像头
+        //TODO: qianlei 预览和实际拍摄的画面有差异
         let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
         
         do {
@@ -182,7 +183,7 @@ class CaptureController: NSObject {
             return
         }
         
-        
+        Toast.showTips("to do")
         
     }
     
@@ -191,7 +192,7 @@ class CaptureController: NSObject {
 extension CaptureController: AVCaptureFileOutputRecordingDelegate {
     
     func startReordingMovie() {
-        guard !self.movieOutput.isRecording else {
+        guard self.movieOutput.isRecording == false else {
             print("movieOutput.isRecording")
             stopRecordingMovie()
             return
@@ -204,12 +205,21 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
         }
         
         if connection.isVideoOrientationSupported {
-            //TODO: qianlei 获取设备方向
-            connection.videoOrientation = .portrait
+            // 获取设备方向
+            connection.videoOrientation = AVCaptureVideoOrientation(ui:UIDevice.current.orientation)
         }
         
         if connection.isVideoStabilizationSupported {
             connection.preferredVideoStabilizationMode = .auto
+        }
+        
+        if connection.isVideoMirroringSupported {
+            // 只有前置摄像头需要镜像
+            if device.position == .front {
+                connection.isVideoMirrored = true
+            } else {
+                connection.isVideoMirrored = false
+            }
         }
         
         if device.isSmoothAutoFocusSupported {
@@ -289,4 +299,30 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
         
     }
     
+}
+
+extension AVCaptureVideoOrientation {
+    var uiDeviceOrientation: UIDeviceOrientation {
+        get {
+            switch self {
+            case .landscapeLeft:        return .landscapeLeft
+            case .landscapeRight:       return .landscapeRight
+            case .portrait:             return .portrait
+            case .portraitUpsideDown:   return .portraitUpsideDown
+            @unknown default:
+                return .portrait
+            }
+        }
+    }
+    
+    // AVCaptureVideoOrientation(ui:UIDevice.current.orientation)
+    init(ui:UIDeviceOrientation) {
+        switch ui {
+        case .landscapeRight:       self = .landscapeRight
+        case .landscapeLeft:        self = .landscapeLeft
+        case .portrait:             self = .portrait
+        case .portraitUpsideDown:   self = .portraitUpsideDown
+        default:                    self = .portrait
+        }
+    }
 }

@@ -20,7 +20,10 @@ class PlayerView: UIView {
         
         self.backgroundColor = .clear
         
+        //TODO: qianlei 前置摄像头显示了镜像
         let layer = self.layer as! AVPlayerLayer
+        layer.videoGravity = .resizeAspectFill
+        
         layer.player = player
         
     }
