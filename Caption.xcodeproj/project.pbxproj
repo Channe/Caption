@@ -17,6 +17,7 @@
 		9771DBDD25AC74B000EA7239 /* PlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBDC25AC74B000EA7239 /* PlayerController.swift */; };
 		9771DBE225AC934B00EA7239 /* SampleDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBE125AC934B00EA7239 /* SampleDataProvider.swift */; };
 		9771DBEC25ACAB6600EA7239 /* AudioCaptionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBEB25ACAB6600EA7239 /* AudioCaptionGenerator.swift */; };
+		9771DBF125AE154C00EA7239 /* CaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBF025AE154C00EA7239 /* CaptureController.swift */; };
 		97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97766D9225AAEB83003AF31D /* AppDelegate.swift */; };
 		97766D9C25AAEB85003AF31D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9B25AAEB85003AF31D /* Assets.xcassets */; };
 		97766D9F25AAEB85003AF31D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9D25AAEB85003AF31D /* LaunchScreen.storyboard */; };
@@ -54,6 +55,7 @@
 		9771DBDC25AC74B000EA7239 /* PlayerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerController.swift; sourceTree = "<group>"; };
 		9771DBE125AC934B00EA7239 /* SampleDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataProvider.swift; sourceTree = "<group>"; };
 		9771DBEB25ACAB6600EA7239 /* AudioCaptionGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCaptionGenerator.swift; sourceTree = "<group>"; };
+		9771DBF025AE154C00EA7239 /* CaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureController.swift; sourceTree = "<group>"; };
 		97766D8F25AAEB83003AF31D /* Caption.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Caption.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97766D9225AAEB83003AF31D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		97766D9B25AAEB85003AF31D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 			children = (
 				97766D9225AAEB83003AF31D /* AppDelegate.swift */,
 				9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */,
+				9771DBF025AE154C00EA7239 /* CaptureController.swift */,
 				9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */,
 				9771DBDC25AC74B000EA7239 /* PlayerController.swift */,
 				9771DBD725AC5ACE00EA7239 /* PlayerView.swift */,
@@ -349,6 +352,7 @@
 				9771DBD825AC5ACE00EA7239 /* PlayerView.swift in Sources */,
 				9771DBCE25AC3A5D00EA7239 /* UIFunc.swift in Sources */,
 				9771DBA025AC27F200EA7239 /* CaptureViewController.swift in Sources */,
+				9771DBF125AE154C00EA7239 /* CaptureController.swift in Sources */,
 				97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */,
 				9771DBEC25ACAB6600EA7239 /* AudioCaptionGenerator.swift in Sources */,
 				9771DBD325AC3B8200EA7239 /* UIColorExtension.swift in Sources */,

@@ -28,6 +28,10 @@
 	<string></string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Speech Recognition for captions</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Capture Video</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Capture Video</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

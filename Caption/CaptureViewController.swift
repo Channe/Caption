@@ -25,13 +25,39 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     }()
     
     private var mediaURL: NSURL? = nil
+    
+    private var captureController: CaptureController? = nil
+    
+    private lazy var switchCameraBtn: UIButton = {
+        let btn = TTButton(title: "Switch", target: self , action: #selector(switchCameraBtnAction))
+        
+        return btn
+    }()
+    
+    @objc private func switchCameraBtnAction() {
+        self.captureController?.switchCamera()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.view.backgroundColor = .gray
 
+        configViews()
+        
+        self.captureController = CaptureController(inView: self.view)
+        self.captureController?.startSession()
+    }
+    
+    private func configViews() {
         configNavi()
+        
+        self.view.addSubview(self.switchCameraBtn)
+        self.switchCameraBtn.snp.makeConstraints { (maker) in
+            maker.right.equalToSuperview().offset(-20)
+//            maker.width.height.equalTo(44)
+            maker.centerY.equalToSuperview()
+        }
     }
 
     private func configNavi() {
