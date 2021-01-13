@@ -72,6 +72,12 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         return label
     }()
     
+    private lazy var circelGradientView: CircleGradientView = {
+        let view = CircleGradientView(lineWidth: 8, startColor: .white, endColor: .white)
+        view.isHidden = true
+        return view
+    }()
+    
     private lazy var startCaptureView: UIView = {
         let view = UIView(frame: .zero)
         view.backgroundColor = TTBlackColor(0.3)
@@ -97,11 +103,16 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             guard let self = self else { return }
             self.durationLabel.text = "0s"
             self.durationLabel.backgroundColor = .clear
+            
+            self.circelGradientView.isHidden = false
+            self.circelGradientView.progess = 0.0
         }
         
         self.captureController?.recordingClosure = { [weak self] duration in
             guard let self = self else { return }
             self.durationLabel.text = "\(String(format: "%.0f", duration))s"
+            
+            self.circelGradientView.progess = CGFloat(duration / 60.0)
         }
         
         self.captureController?.finishClosure = { [weak self] outputURL in
@@ -130,11 +141,17 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             maker.width.height.equalTo(60)
         }
         
+        self.view.addSubview(self.circelGradientView)
+        self.circelGradientView.snp.makeConstraints { (maker) in
+            maker.centerX.equalToSuperview()
+            maker.width.height.equalTo(116)
+            maker.bottom.equalToSuperview().offset(-60)
+        }
+        
         self.view.addSubview(self.startCaptureView)
         self.startCaptureView.snp.makeConstraints { (maker) in
-            maker.centerX.equalToSuperview()
+            maker.center.equalTo(self.circelGradientView)
             maker.width.height.equalTo(90)
-            maker.bottom.equalToSuperview().offset(-60)
         }
         
         self.startCaptureView.addSubview(self.durationLabel)
@@ -145,14 +162,14 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         self.view.addSubview(self.cancelBtn)
         self.cancelBtn.snp.makeConstraints { (maker) in
-            maker.right.equalTo(self.startCaptureView.snp.left).offset(-30)
+            maker.right.equalTo(self.startCaptureView.snp.left).offset(-40)
             maker.width.height.equalTo(36)
             maker.centerY.equalTo(self.startCaptureView)
         }
         
         self.view.addSubview(self.nextBtn)
         self.nextBtn.snp.makeConstraints { (maker) in
-            maker.left.equalTo(self.startCaptureView.snp.right).offset(30)
+            maker.left.equalTo(self.startCaptureView.snp.right).offset(40)
             maker.width.height.equalTo(36)
             maker.centerY.equalTo(self.startCaptureView)
         }
@@ -207,6 +224,10 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         self.durationLabel.text = ""
         self.durationLabel.backgroundColor = .white
+        
+        self.circelGradientView.isHidden = true
+        self.circelGradientView.progess = 0.0
+        
         showCancelBtn(false)
         
         do {
