@@ -30,20 +30,54 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     
     private lazy var flashBtn: UIButton = {
         let btn = TTButton(title: "Flash", target: self , action: #selector(flashBtnAction))
-        
+        btn.layer.masksToBounds = true
+        btn.layer.cornerRadius = 60/2
+        btn.isHidden = true
         return btn
     }()
     
     private lazy var switchCameraBtn: UIButton = {
         let btn = TTButton(title: "Switch", target: self , action: #selector(switchCameraBtnAction))
-        
+        btn.layer.masksToBounds = true
+        btn.layer.cornerRadius = 60/2
         return btn
+    }()
+    
+    private lazy var cancelBtn: UIButton = {
+        let btn = TTButton(title: "NO", target: self , action: #selector(cancelCaptureAction))
+        btn.layer.masksToBounds = true
+        btn.layer.cornerRadius = 36/2
+        btn.isHidden = true
+        return btn
+    }()
+    
+    private lazy var nextBtn: UIButton = {
+        let btn = TTButton(title: "OK", target: self , action: #selector(nextBtnAction))
+        btn.layer.masksToBounds = true
+        btn.layer.cornerRadius = 36/2
+        btn.isHidden = true
+        return btn
+    }()
+    
+    private lazy var durationLabel: UILabel = {
+        let label = UILabel(frame: .zero)
+        label.textAlignment = .center
+        label.font = TTFontB(24)
+        label.textColor = .white
+        label.text = ""
+        label.backgroundColor = .white
+        label.layer.masksToBounds = true
+        label.layer.cornerRadius = 36/2
+        
+        return label
     }()
     
     private lazy var startCaptureView: UIView = {
         let view = UIView(frame: .zero)
-        view.backgroundColor = .groupTableViewBackground
+        view.backgroundColor = TTBlackColor(0.3)
         view.isUserInteractionEnabled = true
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = 90/2
         
         let longPress = UILongPressGestureRecognizer(target: self , action: #selector(startCaptureAction(gesture:)))
         view.addGestureRecognizer(longPress)
@@ -59,6 +93,23 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         configViews()
         
         self.captureController = CaptureController(inView: self.view, saveToURL: URL(fileURLWithPath: savePath))
+        self.captureController?.startClosure = { [weak self] in
+            guard let self = self else { return }
+            self.durationLabel.text = "0s"
+            self.durationLabel.backgroundColor = .clear
+        }
+        
+        self.captureController?.recordingClosure = { [weak self] duration in
+            guard let self = self else { return }
+            self.durationLabel.text = "\(String(format: "%.0f", duration))s"
+        }
+        
+        self.captureController?.finishClosure = { [weak self] outputURL in
+            guard let self = self else { return }
+            print("finishClosure:\(outputURL)")
+            self.showCancelBtn(true)
+        }
+        
         self.captureController?.startSession()
     }
     
@@ -82,8 +133,28 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         self.view.addSubview(self.startCaptureView)
         self.startCaptureView.snp.makeConstraints { (maker) in
             maker.centerX.equalToSuperview()
-            maker.width.height.equalTo(100)
+            maker.width.height.equalTo(90)
             maker.bottom.equalToSuperview().offset(-60)
+        }
+        
+        self.startCaptureView.addSubview(self.durationLabel)
+        self.durationLabel.snp.makeConstraints { (maker) in
+            maker.width.height.equalTo(36)
+            maker.center.equalToSuperview()
+        }
+        
+        self.view.addSubview(self.cancelBtn)
+        self.cancelBtn.snp.makeConstraints { (maker) in
+            maker.right.equalTo(self.startCaptureView.snp.left).offset(-30)
+            maker.width.height.equalTo(36)
+            maker.centerY.equalTo(self.startCaptureView)
+        }
+        
+        self.view.addSubview(self.nextBtn)
+        self.nextBtn.snp.makeConstraints { (maker) in
+            maker.left.equalTo(self.startCaptureView.snp.right).offset(30)
+            maker.width.height.equalTo(36)
+            maker.centerY.equalTo(self.startCaptureView)
         }
     }
 
@@ -98,15 +169,20 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         navigationItem.leftBarButtonItem = leftItem
         
-        let nextBtn = UIButton(frame: CGRect(origin: .zero, size: CGSize(width: 40, height: 40)))
-        nextBtn.setTitle("Next", for: .normal)
-        nextBtn.setTitleColor(.black, for: .normal)
-        nextBtn.addTarget(self, action: #selector(nextBtnAction), for: .touchUpInside)
+//        let nextBtn = UIButton(frame: CGRect(origin: .zero, size: CGSize(width: 40, height: 40)))
+//        nextBtn.setTitle("Next", for: .normal)
+//        nextBtn.setTitleColor(.black, for: .normal)
+//        nextBtn.addTarget(self, action: #selector(nextBtnAction), for: .touchUpInside)
+//
+//        let rightItem = UIBarButtonItem(customView: nextBtn)
+//
+//        navigationItem.rightBarButtonItem = rightItem
         
-        let rightItem = UIBarButtonItem(customView: nextBtn)
-        
-        navigationItem.rightBarButtonItem = rightItem
-        
+    }
+    
+    private func showCancelBtn(_ yesOrNo: Bool) {
+        self.cancelBtn.isHidden = !yesOrNo
+        self.nextBtn.isHidden = !yesOrNo
     }
     
     //MARK: - Actions
@@ -124,6 +200,20 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         }
                 
         captureController.openFlash(yesOrNo: captureController.isFlashEnable)
+    }
+    
+    @objc private func cancelCaptureAction() {
+        print(#function)
+        
+        self.durationLabel.text = ""
+        self.durationLabel.backgroundColor = .white
+        showCancelBtn(false)
+        
+        do {
+            try FileManager.default.removeItem(atPath: savePath)
+        } catch {
+            print("remove file error:\(error)")
+        }
     }
     
     @objc private func nextBtnAction() {

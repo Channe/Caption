@@ -41,7 +41,7 @@ class VideoPlayerViewController: UIViewController {
         let playerView = self.playerControlloer.playerView
         self.view.addSubview(playerView)
         playerView.snp.makeConstraints { (maker) in
-            maker.edges.equalToSuperview().inset(UIEdgeInsets(top: 100, left: 20, bottom: 40, right: 20))
+            maker.edges.equalToSuperview()
         }
         
     }

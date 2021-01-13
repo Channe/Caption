@@ -8,6 +8,10 @@
 import UIKit
 import AVFoundation
 
+typealias CaptureMovieStartClosure = () -> Void
+typealias CaptureMovieRecordingClosure = (TimeInterval) -> Void
+typealias CaptureMovieFinishClosure = (URL) -> Void
+
 class CaptureController: NSObject {
     
     private lazy var captureSession: AVCaptureSession = {
@@ -35,6 +39,10 @@ class CaptureController: NSObject {
     private var timer: Timer?
     private var duration: TimeInterval = 0
     
+    var startClosure: CaptureMovieStartClosure? = nil
+    var recordingClosure: CaptureMovieRecordingClosure? = nil
+    var finishClosure: CaptureMovieFinishClosure? = nil
+
     init(inView view: UIView, saveToURL: URL) {
         
         self.previewView = view
@@ -240,6 +248,8 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
         print("didStartRecordingTo...")
         
         startTimer()
+        
+        self.startClosure?()
     }
     
     private func startTimer() {
@@ -260,6 +270,7 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
         self.duration += 1
         print("recording movie duration: \(self.duration)")
         
+        self.recordingClosure?(self.duration)
     }
     
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
@@ -271,6 +282,8 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
         
         // 录像结束，保存到沙盒，不需要保存到系统相册
         print("didFinishRecordingTo:\(outputFileURL)")
+        
+        self.finishClosure?(outputFileURL)
         
         cancelTimer()
         
