@@ -13,6 +13,7 @@ target 'Caption' do
   pod 'XCGLogger', '~> 7.0'
   
   pod 'LookinServer', :configurations => ['Debug']
-
+#  pod 'WoodPeckeriOS', :configurations => ['Debug']
+  
 end
 
