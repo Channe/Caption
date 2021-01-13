@@ -48,16 +48,16 @@ struct Toast {
     }()
     
     static func showTips(_ msg:String, duration:Double = 2) {
-        print("will showTips:\(msg)")
-        guard !msg.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return
-        }
-        
-        guard let view = AppDelegate.current.window else {
-            return
-        }
-        
         DispatchQueue.main.async {
+            print("will showTips:\(msg)")
+            guard !msg.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return
+            }
+            
+            guard let view = AppDelegate.current.window else {
+                return
+            }
+            
             bgView.subviews.forEach { $0.removeFromSuperview() }
             view.addSubview(bgView)
             bgView.addSubview(tipsLabel)
@@ -83,22 +83,19 @@ struct Toast {
                 make.height.greaterThanOrEqualTo(20*2+12)
                 make.right.lessThanOrEqualTo(-50)
             }
-        }
-        
-        DispatchQueue.main.async {
+            
             UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseInOut, animations: {
                 bgView.alpha = 1
             }, completion: nil)
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseInOut, animations: {
-                bgView.alpha = 0
-            }) { _ in
-                bgView.removeFromSuperview()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseInOut, animations: {
+                    bgView.alpha = 0
+                }) { _ in
+                    bgView.removeFromSuperview()
+                }
             }
         }
-        
     }
     
     static func showLoading(functionName: StaticString = #function, isAllShowing: Bool = false) {

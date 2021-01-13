@@ -8,7 +8,7 @@
 import UIKit
 import AVFoundation
 
-class CaptureController {
+class CaptureController: NSObject {
     
     private lazy var captureSession: AVCaptureSession = {
         let session = AVCaptureSession()
@@ -29,7 +29,21 @@ class CaptureController {
     private let movieOutput = AVCaptureMovieFileOutput()
     private var activeInput: AVCaptureDeviceInput? = nil
     
-    init(inView view: UIView) {
+    private weak var previewView: UIView?
+    private var outputURL:URL
+    
+    private var timer: Timer?
+    private var duration: TimeInterval = 0
+    
+    init(inView view: UIView, saveToURL: URL) {
+        
+        self.previewView = view
+        self.outputURL = saveToURL
+        
+        super.init()
+        
+        let tap = UITapGestureRecognizer(target: self , action: #selector(tapToFocusAction))
+        view.addGestureRecognizer(tap)
         
         setupSession()
         
@@ -39,10 +53,8 @@ class CaptureController {
     
     private func setupSession() {
         
-        let camera = AVCaptureDevice.default(for: .video)
-        /*
-         前置摄像头
-         */
+        // 默认是前置摄像头
+        let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
         
         do {
             let input = try AVCaptureDeviceInput(device: camera!)
@@ -63,7 +75,6 @@ class CaptureController {
             let micInput = try AVCaptureDeviceInput(device: microphone!)
             if captureSession.canAddInput(micInput){
                 captureSession.addInput(micInput)
-                //   添加麦克风的输入
             }
         } catch {
             print("Error setting device audio input: \(String(describing: error.localizedDescription))")
@@ -113,6 +124,156 @@ class CaptureController {
         } catch {
             print("Error , switching cameras: \(String(describing: error))")
         }
+    }
+    
+    @objc private func tapToFocusAction(gesture: UIGestureRecognizer) {
+        guard let device = self.activeInput?.device,
+              device.isFocusPointOfInterestSupported else {
+            return
+        }
+        
+        let point = gesture.location(in: self.previewView)
+        let poi = self.previewLayer.captureDevicePointConverted(fromLayerPoint: point)
+        
+        focusAtPoint(poi)
+    }
+    
+    private func focusAtPoint(_ point: CGPoint) {
+        guard let device = self.activeInput?.device,
+              device.isFocusPointOfInterestSupported,
+              device.isFocusModeSupported(.autoFocus) else {
+            return
+        }
+        
+        do {
+            try device.lockForConfiguration()
+            device.focusPointOfInterest = point
+            device.focusMode = .autoFocus
+            device.unlockForConfiguration()
+        } catch {
+            print("Error focusing on POI: \(String(describing: error.localizedDescription))")
+        }
+    }
+    
+    var isFlashOpened: Bool = false
+    var isFlashEnable: Bool {
+        get {
+            return self.activeInput?.device.isFlashAvailable ?? false
+        }
+    }
+    
+    func openFlash(yesOrNo: Bool) {
+        //TODO: qianlei 打开闪光灯，记录闪光灯状态
+        
+        guard let device = self.activeInput?.device else {
+            return
+        }
+        
+        guard device.isFlashAvailable else {
+            isFlashOpened = false
+            return
+        }
+        
+        
+        
+    }
+    
+}
+
+extension CaptureController: AVCaptureFileOutputRecordingDelegate {
+    
+    func startReordingMovie() {
+        guard !self.movieOutput.isRecording else {
+            print("movieOutput.isRecording")
+            stopRecordingMovie()
+            return
+        }
+        guard let device = self.activeInput?.device else {
+            return
+        }
+        guard let connection = self.movieOutput.connection(with: .video) else {
+            return
+        }
+        
+        if connection.isVideoOrientationSupported {
+            //TODO: qianlei 获取设备方向
+            connection.videoOrientation = .portrait
+        }
+        
+        if connection.isVideoStabilizationSupported {
+            connection.preferredVideoStabilizationMode = .auto
+        }
+        
+        if device.isSmoothAutoFocusSupported {
+            do {
+                try device.lockForConfiguration()
+                device.isSmoothAutoFocusEnabled = false
+                device.unlockForConfiguration()
+            } catch {
+                print("Error setting configuration: \(String(describing: error.localizedDescription))")
+            }
+        }
+        
+        if FileManager.default.fileExists(atPath: self.outputURL.path) {
+            do {
+                try FileManager.default.removeItem(at: self.outputURL)
+            } catch {
+                print("Delete exist file error:\(self.outputURL)")
+            }
+        }
+        
+        self.movieOutput.startRecording(to: self.outputURL, recordingDelegate: self)
+    }
+    
+    func stopRecordingMovie() {
+        
+        self.movieOutput.stopRecording()
+        
+    }
+    
+    //MARK: - AVCaptureFileOutputRecordingDelegate
+
+    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
+        //TODO: qianlei 开始录像
+        //TODO: Qianlei 录像了几秒
+        //TODO: Qianlei 录像结束，已保存到沙盒
+        print("didStartRecordingTo...")
+        
+        startTimer()
+    }
+    
+    private func startTimer() {
+        cancelTimer()
+        self.timer = Timer.scheduledTimer(timeInterval: 1, target: self , selector: #selector(timerFiredAction), userInfo: nil, repeats: true)
+    }
+    
+    private func cancelTimer() {
+        if self.timer != nil {
+            self.timer?.invalidate()
+            self.timer = nil
+            self.duration = 0
+        }
+    }
+    
+    @objc private func timerFiredAction() {
+        
+        self.duration += 1
+        print("recording movie duration: \(self.duration)")
+        
+    }
+    
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        guard error == nil else {
+            print("Error, recording movie: \(error as Any)")
+            cancelTimer()
+            return
+        }
+        
+        // 录像结束，保存到沙盒，不需要保存到系统相册
+        print("didFinishRecordingTo:\(outputFileURL)")
+        
+        cancelTimer()
+        
     }
     
 }

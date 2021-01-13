@@ -24,9 +24,15 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         return picker
     }()
     
-    private var mediaURL: NSURL? = nil
+//    private var mediaURL: NSURL? = nil
     
     private var captureController: CaptureController? = nil
+    
+    private lazy var flashBtn: UIButton = {
+        let btn = TTButton(title: "Flash", target: self , action: #selector(flashBtnAction))
+        
+        return btn
+    }()
     
     private lazy var switchCameraBtn: UIButton = {
         let btn = TTButton(title: "Switch", target: self , action: #selector(switchCameraBtnAction))
@@ -34,9 +40,16 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         return btn
     }()
     
-    @objc private func switchCameraBtnAction() {
-        self.captureController?.switchCamera()
-    }
+    private lazy var startCaptureView: UIView = {
+        let view = UIView(frame: .zero)
+        view.backgroundColor = .groupTableViewBackground
+        view.isUserInteractionEnabled = true
+        
+        let longPress = UILongPressGestureRecognizer(target: self , action: #selector(startCaptureAction(gesture:)))
+        view.addGestureRecognizer(longPress)
+        
+        return view
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,7 +58,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
 
         configViews()
         
-        self.captureController = CaptureController(inView: self.view)
+        self.captureController = CaptureController(inView: self.view, saveToURL: URL(fileURLWithPath: savePath))
         self.captureController?.startSession()
     }
     
@@ -55,8 +68,22 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         self.view.addSubview(self.switchCameraBtn)
         self.switchCameraBtn.snp.makeConstraints { (maker) in
             maker.right.equalToSuperview().offset(-20)
-//            maker.width.height.equalTo(44)
+            maker.width.height.equalTo(60)
             maker.centerY.equalToSuperview()
+        }
+        
+        self.view.addSubview(self.flashBtn)
+        self.flashBtn.snp.makeConstraints { (maker) in
+            maker.right.equalTo(self.switchCameraBtn.snp.right)
+            maker.bottom.equalTo(self.switchCameraBtn.snp.top).offset(-20)
+            maker.width.height.equalTo(60)
+        }
+        
+        self.view.addSubview(self.startCaptureView)
+        self.startCaptureView.snp.makeConstraints { (maker) in
+            maker.centerX.equalToSuperview()
+            maker.width.height.equalTo(100)
+            maker.bottom.equalToSuperview().offset(-60)
         }
     }
 
@@ -82,22 +109,61 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
     }
     
+    //MARK: - Actions
+    
     @objc private func selectBtnAction() {
         
         self.present(imagePicker, animated: true, completion: nil)
         
     }
     
+    @objc private func flashBtnAction() {
+        // 打开闪光灯
+        guard let captureController = self.captureController else {
+            return
+        }
+                
+        captureController.openFlash(yesOrNo: captureController.isFlashEnable)
+    }
+    
     @objc private func nextBtnAction() {
         
-        guard let urlString = mediaURL?.absoluteString else {
-            Toast.showTips("Please select video first")
+        if FileManager.default.fileExists(atPath: savePath) == false {
+            Toast.showTips("Please select or capture video first")
             return
         }
         
-        let videoPlayerVC = VideoPlayerViewController(videoURL: URL(fileURLWithPath: urlString))
+        let videoPlayerVC = VideoPlayerViewController(videoURL: URL(fileURLWithPath: savePath))
         
         self.navigationController?.pushViewController(videoPlayerVC, animated: true)
+    }
+    
+    @objc private func switchCameraBtnAction() {
+        
+        guard let captureController = self.captureController else {
+            return
+        }
+        
+        captureController.switchCamera()
+        
+        if captureController.isFlashEnable {
+            self.flashBtn.isHidden = false
+        } else {
+            self.flashBtn.isHidden = true
+        }
+        
+    }
+    
+    @objc private func startCaptureAction(gesture: UILongPressGestureRecognizer) {
+        
+        if gesture.state == .began {
+            // 长按开始
+            self.captureController?.startReordingMovie()
+        } else if gesture.state == .ended {
+            // 长按结束
+            self.captureController?.stopRecordingMovie()
+        }
+        
     }
     
     // MARK: - UIImagePickerControllerDelegate, UINavigationControllerDelegate
@@ -110,10 +176,10 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         guard let mediaURL = info[UIImagePickerController.InfoKey.mediaURL] as? NSURL else {
             return
         }
-        
+
         print(mediaURL)
-        self.mediaURL = mediaURL
-        
+//        self.mediaURL = mediaURL
+
         guard let videoURL = URL(string: mediaURL.absoluteString!) else {
             picker.dismiss(animated: true, completion: nil)
             return
@@ -144,28 +210,32 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         exportSession.outputURL = URL(fileURLWithPath: savePath)
         exportSession.outputFileType = .mp4
         exportSession.exportAsynchronously {
-            print("export video...")
-            let status = exportSession.status
             
-            switch status {
-            
-            case .unknown:
-                break
-            case .waiting:
-                break
-            case .exporting:
-                break
-            case .completed:
-                print("export video completed")
-            case .failed:
-                print(exportSession.error as Any)
-                Toast.showTips(exportSession.error!.localizedDescription)
-                print("export video failed")
-            case .cancelled:
-                break
-            @unknown default:
-                break
+            DispatchQueue.main.async {
+                print("export video...")
+                let status = exportSession.status
+                
+                switch status {
+                
+                case .unknown:
+                    break
+                case .waiting:
+                    break
+                case .exporting:
+                    break
+                case .completed:
+                    print("export video completed")
+                case .failed:
+                    print(exportSession.error as Any)
+                    Toast.showTips(exportSession.error!.localizedDescription)
+                    print("export video failed")
+                case .cancelled:
+                    break
+                @unknown default:
+                    break
+                }
             }
+            
         }
     }
     
