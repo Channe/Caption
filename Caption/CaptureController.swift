@@ -252,9 +252,6 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
     //MARK: - AVCaptureFileOutputRecordingDelegate
 
     func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
-        //TODO: qianlei 开始录像
-        //TODO: Qianlei 录像了几秒
-        //TODO: Qianlei 录像结束，已保存到沙盒
         print("didStartRecordingTo...")
         
         startTimer()

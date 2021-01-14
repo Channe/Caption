@@ -138,9 +138,9 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
         recognitionRequest.shouldReportPartialResults = true
         
         // 在线语音识别效果比离线更好
-        if #available(iOS 13, *) {
-            recognitionRequest.requiresOnDeviceRecognition = true
-        }
+//        if #available(iOS 13, *) {
+//            recognitionRequest.requiresOnDeviceRecognition = true
+//        }
         
         self.recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest, resultHandler: { [weak self](result, error) in
             guard let self = self else { return }

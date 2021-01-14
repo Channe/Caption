@@ -9,7 +9,9 @@ import UIKit
 import MobileCoreServices
 import Photos
 
-let savePath: String = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/saved.mp4"
+//let savePathDir: String = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/caption/"
+//let savePath: String = savePathDir + "saved.mp4"
+let savePath: String = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/caption/saved.mp4"
 
 class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
@@ -61,6 +63,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         let label = UILabel(frame: .zero)
         label.textAlignment = .center
         label.font = TTFontB(24)
+        label.adjustsFontSizeToFitWidth = true
         label.textColor = .white
         label.text = ""
         label.backgroundColor = .white
@@ -99,18 +102,12 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         self.captureController = CaptureController(inView: self.view, saveToURL: URL(fileURLWithPath: savePath))
         self.captureController?.startClosure = { [weak self] in
             guard let self = self else { return }
-            self.durationLabel.text = "0s"
-            self.durationLabel.backgroundColor = .clear
-            
-            self.circelGradientView.isHidden = false
-            self.circelGradientView.progess = 0.0
+            self.showProgress(duration: 0)
         }
         
         self.captureController?.recordingClosure = { [weak self] duration in
             guard let self = self else { return }
-            self.durationLabel.text = "\(String(format: "%.0f", duration))s"
-            
-            self.circelGradientView.progess = CGFloat(duration / 60.0)
+            self.showProgress(duration: duration)
         }
         
         self.captureController?.finishClosure = { [weak self] outputURL in
@@ -118,6 +115,15 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             print("finishClosure:\(outputURL)")
             self.showCancelBtn(true)
         }
+        
+//        var isDir:ObjCBool = true
+//        if FileManager.default.fileExists(atPath: savePathDir, isDirectory: &isDir) == false {
+//            do {
+//                try FileManager.default.createDirectory(atPath: savePathDir, withIntermediateDirectories: true, attributes: nil)
+//            } catch {
+//                print("createDirectory error:\(savePathDir)")
+//            }
+//        }
         
         self.captureController?.startSession()
     }
@@ -189,6 +195,32 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     private func showCancelBtn(_ yesOrNo: Bool) {
         self.cancelBtn.isHidden = !yesOrNo
         self.nextBtn.isHidden = !yesOrNo
+        
+        if yesOrNo {
+            let asset = AVAsset(url: URL(fileURLWithPath: savePath))
+            let duration = asset.duration.seconds
+            showProgress(duration: duration)
+        } else {
+            showProgress(duration: nil)
+        }
+    }
+    
+    private func showProgress(duration: TimeInterval?) {
+        
+        guard let duration = duration else {
+            self.durationLabel.text = ""
+            self.durationLabel.backgroundColor = .white
+            
+            self.circelGradientView.isHidden = true
+            self.circelGradientView.progess = 0.0
+            return
+        }
+        
+        self.durationLabel.text = "\(String(format: "%.0f", duration))s"
+        self.durationLabel.backgroundColor = .clear
+        
+        self.circelGradientView.isHidden = false
+        self.circelGradientView.progess = CGFloat(duration / 60.0)
     }
     
     //MARK: - Actions
@@ -210,12 +242,6 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     
     @objc private func cancelCaptureAction() {
         print(#function)
-        
-        self.durationLabel.text = ""
-        self.durationLabel.backgroundColor = .white
-        
-        self.circelGradientView.isHidden = true
-        self.circelGradientView.progess = 0.0
         
         showCancelBtn(false)
         
@@ -306,7 +332,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         exportSession.outputFileType = .mp4
         exportSession.exportAsynchronously {
             
-            print("export video...")
+            print("export video...: \(savePath)")
             let status = exportSession.status
             
             switch status {
@@ -319,6 +345,9 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
                 break
             case .completed:
                 print("export video completed")
+                DispatchQueue.main.async {
+                    self.showCancelBtn(true)
+                }
             case .failed:
                 print(exportSession.error as Any)
                 Toast.showTips(exportSession.error!.localizedDescription)
