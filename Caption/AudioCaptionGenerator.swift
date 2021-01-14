@@ -16,10 +16,13 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
     private var recognitionFileRequest: SFSpeechURLRecognitionRequest?
     
     private var recognitionTask: SFSpeechRecognitionTask?
-    
-    private let audioEngine = AVAudioEngine()
-    
+        
     private let videoURL: URL
+    
+    var finalResult: SFTranscription? = nil
+    var finalText: String {
+        return self.finalResult?.formattedString ?? ""
+    }
 
     init(URL: URL) {
         self.videoURL = URL
@@ -98,17 +101,15 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
                 isFinal = result.isFinal
                 print("Text --------:")
                 print(string)
-                
-                if isFinal {
-                    //TODO: qianlei 一直没有触发
-                    print("isFinal Text --------:")
-                    print(string)
-                }
             }
             
             if error != nil || isFinal {
                 print("speech recognizer...")
                 print(error?.localizedDescription ?? "speech recognizer is completed.")
+                
+                if result != nil {
+                    self.finalResult = result!.bestTranscription
+                }
                 
                 DispatchQueue.main.async {
                     self.recognitionRequest?.endAudio()
@@ -135,7 +136,7 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
         
         let recognitionRequest = self.recognitionFileRequest!
         
-        recognitionRequest.shouldReportPartialResults = true
+//        recognitionRequest.shouldReportPartialResults = true
         
         // 在线语音识别效果比离线更好
 //        if #available(iOS 13, *) {
@@ -152,17 +153,15 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
                 isFinal = result.isFinal
                 print("Text --------:")
                 print(string)
-                
-                if isFinal {
-                    //TODO: qianlei 一直没有触发
-                    print("isFinal Text --------:")
-                    print(string)
-                }
             }
             
             if error != nil || isFinal {
                 print("speech recognizer...")
                 print(error?.localizedDescription ?? "speech recognizer is completed.")
+                
+                if result != nil {
+                    self.finalResult = result!.bestTranscription
+                }
                 
                 DispatchQueue.main.async {
                     self.recognitionTask?.cancel()

@@ -9,9 +9,7 @@ import UIKit
 import MobileCoreServices
 import Photos
 
-//let savePathDir: String = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/caption/"
-//let savePath: String = savePathDir + "saved.mp4"
-let savePath: String = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/caption/saved.mp4"
+let savePath: String = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/saved.mp4"
 
 class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
@@ -38,6 +36,13 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     
     private lazy var switchCameraBtn: UIButton = {
         let btn = TTButton(title: "Switch", target: self , action: #selector(switchCameraBtnAction))
+        btn.layer.masksToBounds = true
+        btn.layer.cornerRadius = 60/2
+        return btn
+    }()
+    
+    private lazy var selectBtn: UIButton = {
+        let btn = TTButton(title: "Select", target: self , action: #selector(selectBtnAction))
         btn.layer.masksToBounds = true
         btn.layer.cornerRadius = 60/2
         return btn
@@ -138,6 +143,13 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             maker.centerY.equalToSuperview()
         }
         
+        self.view.addSubview(self.selectBtn)
+        self.selectBtn.snp.makeConstraints { (maker) in
+            maker.right.equalToSuperview().offset(-20)
+            maker.width.height.equalTo(60)
+            maker.top.equalTo(self.switchCameraBtn.snp.bottom).offset(20)
+        }
+        
         self.view.addSubview(self.flashBtn)
         self.flashBtn.snp.makeConstraints { (maker) in
             maker.right.equalTo(self.switchCameraBtn.snp.right)
@@ -181,14 +193,18 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
 
     private func configNavi() {
         
-        let selectBtn = UIButton(frame: CGRect(origin: .zero, size: CGSize(width: 40, height: 40)))
-        selectBtn.setTitle("Select Video", for: .normal)
-        selectBtn.setTitleColor(.black, for: .normal)
-        selectBtn.addTarget(self, action: #selector(selectBtnAction), for: .touchUpInside)
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
         
-        let leftItem = UIBarButtonItem(customView: selectBtn)
-        
-        navigationItem.leftBarButtonItem = leftItem
+//        let selectBtn = UIButton(frame: CGRect(origin: .zero, size: CGSize(width: 40, height: 40)))
+//        selectBtn.setTitle("Select Video", for: .normal)
+//        selectBtn.setTitleColor(.black, for: .normal)
+//        selectBtn.addTarget(self, action: #selector(selectBtnAction), for: .touchUpInside)
+//
+//        let leftItem = UIBarButtonItem(customView: selectBtn)
+//
+//        navigationItem.leftBarButtonItem = leftItem
         
     }
     

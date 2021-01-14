@@ -10,28 +10,25 @@ import AVFoundation
 
 class PlayerController: NSObject {
     
+    private let keys = ["tracks","duration","commonMetadata"]
+
     private var asset: AVAsset
+    
     private var playerItem: AVPlayerItem
     private var player: AVPlayer
     private(set) var playerView: PlayerView
     
-    init(URL: URL) {
+    private(set) var repeats: Bool
+
+    init(URL: URL, repeats: Bool = true) {
         self.asset = AVAsset(url: URL)
+        self.repeats = repeats
         
-        let keys = ["tracks","duration","commonMetadata"]
-        
-        self.playerItem = AVPlayerItem(asset: self.asset, automaticallyLoadedAssetKeys: keys)
-        self.player = AVPlayer(playerItem: playerItem)
+        self.playerItem = AVPlayerItem(asset: self.asset, automaticallyLoadedAssetKeys: self.keys)
+        self.player = AVPlayer(playerItem: self.playerItem)
         self.playerView = PlayerView(player: self.player)
         
         super.init()
-        
-        prepareToPlay()
-    }
-    
-    private func prepareToPlay() {
-        
-        self.playerItem.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), options: [.old, .new], context: &PlayerItemStatusContext)
         
         // 播放视频时打开声音
         do {
@@ -39,6 +36,22 @@ class PlayerController: NSObject {
         } catch {
             print("Setting category to AVAudioSessionCategoryPlayback failed.")
         }
+        
+        self.prepareToPlay()
+
+        if self.repeats {
+            NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: nil, queue: .main) { [weak self](note) in
+                guard let self = self else { return }
+                
+                self.player.seek(to: CMTime(seconds: 0, preferredTimescale: 600))
+                self.player.play()
+            }
+        }
+    }
+    
+    private func prepareToPlay() {
+        
+        self.playerItem.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), options: [.old, .new], context: &self.PlayerItemStatusContext)
     }
     
     //MARK: - KVO
