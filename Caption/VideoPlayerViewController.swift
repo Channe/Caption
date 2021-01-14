@@ -18,16 +18,73 @@ class VideoPlayerViewController: UIViewController {
         return btn
     }()
     
+    // 正在进行
+    private lazy var captioningView: UIStackView = {
+        let label = TTLabel(font: TTFontB(28), color: .white, alignment: .right)
+        label.text = "Generating Captions"
+        
+        let activity = UIActivityIndicatorView(frame: .zero)
+        activity.hidesWhenStopped = false
+        activity.style = .large
+        activity.color = .white
+        activity.startAnimating()
+        
+        let stack = UIStackView(arrangedSubviews: [label, activity])
+        stack.alignment = .center
+        stack.axis = .horizontal
+        stack.distribution = .fill
+        stack.isHidden = false
+        return stack
+    }()
+    
+    // 失败、点击重试
+    private lazy var failedRetryBtn: UIButton = {
+        let btn = TTButton(title: "Failed", target: self , action: #selector(failedRetryBtnAction))
+        btn.setTitleColor(.white, for: .normal)
+        btn.backgroundColor = .red
+        btn.titleLabel?.font = TTFontB(28)
+        btn.titleLabel?.textAlignment = .right
+        btn.isHidden = true
+        
+        return btn
+    }()
+    
     init(videoURL: URL) {
         self.playerControlloer = PlayerController(URL: videoURL)
-        //TODO: qianlei 提前进行语音转文字
+        
+        // 语音转文字
         self.captionGenerator = AudioCaptionGenerator(URL: URL(fileURLWithPath: savePath))
         
         super.init(nibName: nil, bundle: nil)
+        
+        self.captionGenerator.startClosure = { [weak self] in
+            guard let self = self else { return }
+            
+            self.captioningView.isHidden = false
+            self.failedRetryBtn.isHidden = true
+        }
+        
+        self.captionGenerator.finishClosure = { [weak self] success in
+            guard let self = self else { return }
+            
+            self.captioningView.isHidden = true
+            self.failedRetryBtn.isHidden = success
+            
+            if success {
+                let text = self.captionGenerator.finalText
+                //TODO: qianlei 显示字幕
+                print("finalText:\(text)")
+                
+            }
+        }
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        print(#function)
     }
     
     override func viewDidLoad() {
@@ -55,6 +112,24 @@ class VideoPlayerViewController: UIViewController {
             maker.bottom.equalToSuperview().offset(-20)
         }
         
+        self.view.addSubview(self.captioningView)
+        self.captioningView.snp.makeConstraints { (maker) in
+            maker.right.equalToSuperview().offset(-20)
+            maker.top.equalToSuperview().offset(90)
+            maker.height.equalTo(40)
+        }
+        
+        self.view.addSubview(self.failedRetryBtn)
+        self.failedRetryBtn.snp.makeConstraints { (maker) in
+            maker.right.equalToSuperview().offset(-20)
+            maker.top.equalToSuperview().offset(90)
+            maker.height.equalTo(40)
+        }
+    }
+    
+    @objc private func failedRetryBtnAction() {
+        // 点击重试
+        self.captionGenerator.startFromFile()
     }
     
     @objc private func saveBtnAction() {

@@ -40,6 +40,7 @@ class PlayerController: NSObject {
         self.prepareToPlay()
 
         if self.repeats {
+            // 循环播放
             NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: nil, queue: .main) { [weak self](note) in
                 guard let self = self else { return }
                 

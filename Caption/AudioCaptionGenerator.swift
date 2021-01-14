@@ -8,7 +8,10 @@
 import Foundation
 import Speech
 
-class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
+typealias CapturenGeneratorStartClosure = () -> Void
+typealias CapturenGeneratorFinishClosure = (Bool) -> Void
+
+class AudioCaptionGenerator: NSObject {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))!
     
@@ -23,13 +26,14 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
     var finalText: String {
         return self.finalResult?.formattedString ?? ""
     }
+    
+    var startClosure: CapturenGeneratorStartClosure?
+    var finishClosure: CapturenGeneratorFinishClosure?
 
     init(URL: URL) {
         self.videoURL = URL
         
         super.init()
-        
-        self.speechRecognizer.delegate = self
         
         requestAuthorization()
     }
@@ -143,6 +147,8 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
 //            recognitionRequest.requiresOnDeviceRecognition = true
 //        }
         
+        self.startClosure?()
+        
         self.recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest, resultHandler: { [weak self](result, error) in
             guard let self = self else { return }
             
@@ -167,11 +173,19 @@ class AudioCaptionGenerator: NSObject, SFSpeechRecognizerDelegate {
                     self.recognitionTask?.cancel()
                     self.recognitionFileRequest = nil
                     self.recognitionTask = nil
+                    
+                    self.finishClosure?(self.finalResult != nil)
                 }
-                
             }
             
         })
+        
     }
+    
+}
+
+extension AudioCaptionGenerator: SFSpeechRecognitionTaskDelegate {
+    
+    
     
 }

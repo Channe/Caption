@@ -26,6 +26,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
     private var captureController: CaptureController? = nil
     
+    //TODO: qianlei 改用 UIStackView: Flash/Switch/Select Btns
     private lazy var flashBtn: UIButton = {
         let btn = TTButton(title: "Flash", target: self , action: #selector(flashBtnAction))
         btn.layer.masksToBounds = true
@@ -120,15 +121,6 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             print("finishClosure:\(outputURL)")
             self.showCancelBtn(true)
         }
-        
-//        var isDir:ObjCBool = true
-//        if FileManager.default.fileExists(atPath: savePathDir, isDirectory: &isDir) == false {
-//            do {
-//                try FileManager.default.createDirectory(atPath: savePathDir, withIntermediateDirectories: true, attributes: nil)
-//            } catch {
-//                print("createDirectory error:\(savePathDir)")
-//            }
-//        }
         
         self.captureController?.startSession()
     }
