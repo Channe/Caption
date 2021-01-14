@@ -65,7 +65,7 @@ let IOS_SCALE = UIScreen.main.scale
 
 @inline(__always) func TTImageView() -> UIImageView {
     let imgV = UIImageView(frame: .zero)
-    imgV.backgroundColor = .groupTableViewBackground
+    imgV.backgroundColor = .systemGroupedBackground
     imgV.contentMode = .scaleAspectFill
     imgV.clipsToBounds = true
     return imgV
@@ -73,7 +73,7 @@ let IOS_SCALE = UIScreen.main.scale
 
 @inline(__always) func TTImageView(_ name:String) -> UIImageView {
     let imgV = UIImageView(image: TTImage(name))
-    imgV.backgroundColor = .groupTableViewBackground
+    imgV.backgroundColor = .systemGroupedBackground
     imgV.contentMode = .scaleAspectFill
     imgV.clipsToBounds = true
     return imgV
@@ -81,7 +81,7 @@ let IOS_SCALE = UIScreen.main.scale
 
 @inline(__always) func TTImageView(_ image:UIImage?) -> UIImageView {
     let imgV = UIImageView(image: image)
-    imgV.backgroundColor = .groupTableViewBackground
+    imgV.backgroundColor = .systemGroupedBackground
     imgV.contentMode = .scaleAspectFill
     imgV.clipsToBounds = true
     return imgV
@@ -92,7 +92,7 @@ let IOS_SCALE = UIScreen.main.scale
     btn.setTitle(title, for: .normal)
     btn.setTitleColor(.black, for: .normal)
     btn.addTarget(target, action: action, for: .touchUpInside)
-    btn.backgroundColor = .groupTableViewBackground
+    btn.backgroundColor = .systemGroupedBackground
     return btn
 }
 
@@ -101,7 +101,7 @@ let IOS_SCALE = UIScreen.main.scale
     btn.setTitle(title, for: .normal)
     btn.setTitleColor(.black, for: .normal)
     btn.addTarget(target, action: action, for: .touchUpInside)
-    btn.backgroundColor = .groupTableViewBackground
+    btn.backgroundColor = .systemGroupedBackground
     return btn
 }
 
@@ -111,7 +111,7 @@ let IOS_SCALE = UIScreen.main.scale
     if target != nil && action != nil {
         btn.addTarget(target!, action: action!, for: .touchUpInside)
     }
-    btn.backgroundColor = .groupTableViewBackground
+    btn.backgroundColor = .systemGroupedBackground
     return btn
 }
 
@@ -121,7 +121,7 @@ let IOS_SCALE = UIScreen.main.scale
     if target != nil && action != nil {
         btn.addTarget(target!, action: action!, for: .touchUpInside)
     }
-    btn.backgroundColor = .groupTableViewBackground
+    btn.backgroundColor = .systemGroupedBackground
     return btn
 }
 
@@ -131,7 +131,7 @@ let IOS_SCALE = UIScreen.main.scale
     if target != nil && action != nil {
         btn.addTarget(target!, action: action!, for: .touchUpInside)
     }
-    btn.backgroundColor = .groupTableViewBackground
+    btn.backgroundColor = .systemGroupedBackground
     return btn
 }
 
@@ -186,15 +186,20 @@ let IOS_SCALE = UIScreen.main.scale
 
 extension String {
     func height(withConstrainedWidth width: CGFloat, font: UIFont) -> CGFloat {
+        
         let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
-        let boundingBox = self.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [.font: font], context: nil)
+        let options: NSStringDrawingOptions = [.usesLineFragmentOrigin, .usesFontLeading]
+        
+        let boundingBox = self.boundingRect(with: constraintRect, options: options, attributes: [.font: font], context: nil)
 
         return ceil(boundingBox.height)
     }
 
     func width(withConstrainedHeight height: CGFloat, font: UIFont) -> CGFloat {
         let constraintRect = CGSize(width: .greatestFiniteMagnitude, height: height)
-        let boundingBox = self.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [.font: font], context: nil)
+        let options: NSStringDrawingOptions = [.usesLineFragmentOrigin, .usesFontLeading]
+
+        let boundingBox = self.boundingRect(with: constraintRect, options: options, attributes: [.font: font], context: nil)
 
         return ceil(boundingBox.width)
     }

@@ -74,7 +74,7 @@ class VideoPlayerViewController: UIViewController {
                 let text = self.captionGenerator.finalText
                 //TODO: qianlei 显示字幕
                 print("finalText:\(text)")
-                
+                self.addSubtitle(text)
             }
         }
     }
@@ -125,6 +125,25 @@ class VideoPlayerViewController: UIViewController {
             maker.top.equalToSuperview().offset(90)
             maker.height.equalTo(40)
         }
+    }
+    
+    func addSubtitle(_ text: String) {
+        let syncLayer = AVSynchronizedLayer(playerItem: self.playerControlloer.playerItem)
+        
+        let font = TTFontB(26)
+        let textWidth = self.view.bounds.width - 20*2
+        let textHeight = text.height(withConstrainedWidth: textWidth, font: font)
+//        let textHeight = CGFloat(400)
+        let size = CGSize(width: textWidth, height: textHeight)
+//        let playerSize = self.playerControlloer.playerView.bounds.size
+        
+        let subtitleItem = SubtitleItem(text: text, timestamp: 0, duration: 12, size: size, font: font)
+        
+        syncLayer.addSublayer(subtitleItem.buildLayer())
+        syncLayer.frame = CGRect(x: 20, y: 200, width: textWidth, height: textHeight)
+        
+        self.playerControlloer.playerView.layer.addSublayer(syncLayer)
+        
     }
     
     @objc private func failedRetryBtnAction() {

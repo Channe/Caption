@@ -321,10 +321,12 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     
     private func saveVideoToSandbox(url videoURL: URL) {
         
-        do {
-            try FileManager.default.removeItem(atPath: savePath)
-        } catch {
-            print("cannot remove exist video file")
+        if FileManager.default.fileExists(atPath: savePath) {
+            do {
+                try FileManager.default.removeItem(atPath: savePath)
+            } catch {
+                print("cannot remove exist video file")
+            }
         }
         
         let asset = AVAsset(url: videoURL)

@@ -14,11 +14,22 @@ class PlayerController: NSObject {
 
     private var asset: AVAsset
     
-    private var playerItem: AVPlayerItem
+    private(set) var playerItem: AVPlayerItem
     private var player: AVPlayer
     private(set) var playerView: PlayerView
     
     private(set) var repeats: Bool
+    
+    private var playerObserver: Any?
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+//        self.playerItem.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: &PlayerItemStatusContext)
+        
+        if let observer = self.playerObserver {
+            self.player.removeTimeObserver(observer)
+        }
+    }
 
     init(URL: URL, repeats: Bool = true) {
         self.asset = AVAsset(url: URL)
@@ -52,7 +63,13 @@ class PlayerController: NSObject {
     
     private func prepareToPlay() {
         
-        self.playerItem.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), options: [.old, .new], context: &self.PlayerItemStatusContext)
+        self.playerItem.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), options: [.old, .new], context: &PlayerItemStatusContext)
+        
+        // 监听播放进度
+        self.playerObserver = self.player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 2), queue: .main) { (cmTime) in
+            print("player time:\(CMTimeGetSeconds(cmTime))")
+            
+        }
     }
     
     //MARK: - KVO
