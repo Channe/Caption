@@ -8,6 +8,15 @@
 import UIKit
 import AVFoundation
 
+typealias ExportVideoStartClosure = () -> Void
+
+enum ExportError: Error {
+    case create
+    case url
+    case custom(String)
+}
+typealias ExportVideoFinishClosure = (Result<URL, ExportError>) -> Void
+
 class PlayerController: NSObject {
     
     private let keys = ["tracks","duration","commonMetadata"]
@@ -71,6 +80,163 @@ class PlayerController: NSObject {
             
         }
     }
+    
+    private var subtitleLayer: CALayer? = nil
+    func displaySubtitle(_ text: String) {
+        let font = TTFontB(26)
+        
+        let playerSize = self.playerView.bounds.size
+        // 字幕宽度固定，高度根据字体动态计算
+        let textWidth = playerSize.width - 20*2
+        let textHeight = text.height(withConstrainedWidth: textWidth, font: font)
+        let size = CGSize(width: textWidth, height: textHeight)
+        
+        //TODO: Qianlei 字幕时间
+        let subtitleItem = SubtitleItem(text: text, timestamp: 0, duration: 5, size: size, font: font)
+        
+        self.subtitleLayer = subtitleItem.buildLayer()
+        
+        let syncLayer = AVSynchronizedLayer(playerItem: self.playerItem)
+        syncLayer.addSublayer(self.subtitleLayer!)
+        // 字幕位置
+        syncLayer.frame = CGRect(x: 20, y: 400, width: textWidth, height: textHeight)
+        
+        self.playerView.layer.addSublayer(syncLayer)
+        
+    }
+    
+    //MARK: - 导出视频
+    
+    func exportCancel() {
+        self.session?.cancelExport()
+    }
+
+    private lazy var composition = AVMutableComposition()
+    private var session: AVAssetExportSession? = nil
+
+    func exportVideo(URL: URL, finish:@escaping ExportVideoFinishClosure) {
+        
+        self.session = nil
+        
+        // 音轨轨迹和视频轨迹
+        let startTime = CMTime.zero
+        let sourceAsset = self.asset
+        let timeRange = CMTimeRange(start: startTime, duration: sourceAsset.duration)
+        
+        do {
+            let videoTrack = self.composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
+            let sourceVideoTrack = sourceAsset.tracks(withMediaType: .video).first!
+            
+            try videoTrack?.insertTimeRange(timeRange, of: sourceVideoTrack, at: startTime)
+        } catch {
+            print("插入合成视频轨迹， 视频有错误")
+            finish(.failure(.create))
+        }
+        
+        do{
+            let audioTrack = self.composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
+            let sourceAudioTrack = sourceAsset.tracks(withMediaType: .audio).first!
+            
+            try audioTrack?.insertTimeRange(timeRange, of: sourceAudioTrack, at: startTime)
+        } catch {
+            print("插入合成视频轨迹， 音频有错误")
+            finish(.failure(.create))
+        }
+        
+        guard let session = self.makeExportable() else {
+            print("export video makeExportable error")
+            finish(.failure(.create))
+            return
+        }
+        
+        session.outputURL = URL
+        
+        self.session = session
+        
+        session.exportAsynchronously {
+            DispatchQueue.main.async {
+                switch session.status {
+                case .unknown:
+                    print("AVAssetExportSessionStatus Unknown")
+                case .waiting:
+                    print("AVAssetExportSessionStatus waiting")
+                case .exporting:
+                    print("AVAssetExportSessionStatus exporting")
+                case .completed:
+                    print("AVAssetExportSessionStatus completed")
+                    finish(.success(URL))
+                case .failed:
+                    print("AVAssetExportSessionStatus failed")
+                    finish(.failure(.custom("failed")))
+                case .cancelled:
+                    print("AVAssetExportSessionStatus cancelled")
+                    finish(.failure(.custom("failed")))
+                @unknown default:
+                    print("AVAssetExportSessionStatus @unknown default")
+                }
+            }
+        }
+
+    }
+    
+    private func makeExportable() -> AVAssetExportSession? {
+        
+        let presetName = AVAssetExportPresetHighestQuality
+        
+        let presets = AVAssetExportSession.exportPresets(compatibleWith: self.composition)
+        guard presets.contains(presetName) else {
+            print("AVAssetExportSession cannot support \(presetName)")
+            return nil
+        }
+        guard let session = AVAssetExportSession(asset: self.composition, presetName: presetName) else {
+            print("AVAssetExportSession error")
+            return nil
+        }
+        session.shouldOptimizeForNetworkUse = true
+        
+        if session.supportedFileTypes.contains(.mp4) {
+            session.outputFileType = .mp4
+        } else {
+            session.outputFileType = session.supportedFileTypes.first!
+        }
+        
+//        let videoComposition = AVMutableVideoComposition()
+                
+        //TODO: 导出时带上字幕
+        if let subtitleLayer = self.subtitleLayer {
+            let videoComposition = AVMutableVideoComposition(propertiesOf: self.composition)
+            
+            //TODO: qianlei videoComposition.renderSize
+//            videoComposition.renderSize = self.playerView.bounds.size
+//            videoComposition.renderScale = 1.0
+//            videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
+//            videoComposition.instructions = ?
+            
+            let animationLayer = CALayer()
+            animationLayer.frame = self.playerView.bounds
+            
+            let videoPlayer = CALayer()
+            videoPlayer.frame = self.playerView.bounds
+            
+            animationLayer.addSublayer(videoPlayer)
+            animationLayer.addSublayer(subtitleLayer)
+            
+            animationLayer.isGeometryFlipped = true // 避免错位现象
+            
+            let animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: videoPlayer, in: animationLayer)
+            
+            videoComposition.animationTool = animationTool
+            
+            session.videoComposition = videoComposition
+        }
+        
+        return session
+    }
+    
+    private func fixedComposition(degree: Int) {
+        
+    }
+    
     
     //MARK: - KVO
     private var PlayerItemStatusContext = 0

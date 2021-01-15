@@ -11,7 +11,7 @@ import AudioToolbox
 class SysFunc {
     
     //TODO: qianlei 没有震动效果
-    public class func feedbackGenerator() {
+    public static func feedbackGenerator() {
 //        let gen = UIImpactFeedbackGenerator(style: .heavy)
         let gen = UISelectionFeedbackGenerator()
         gen.prepare()
@@ -20,6 +20,10 @@ class SysFunc {
         
 //        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
 //        AudioServicesPlaySystemSound(1519)
+    }
+    
+    public static func openAppSettings() {
+        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, completionHandler: nil)
     }
     
 }

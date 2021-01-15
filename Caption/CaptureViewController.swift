@@ -9,7 +9,7 @@ import UIKit
 import MobileCoreServices
 import Photos
 
-let savePath: String = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/saved.mp4"
+let savePath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/saved.mp4"
 
 class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
@@ -334,7 +334,11 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             print("cannot export")
             return
         }
-        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+        
+//        let presetName = AVAssetExportPresetPassthrough 
+        let presetName = AVAssetExportPresetHighestQuality
+        
+        guard let exportSession = AVAssetExportSession(asset: asset, presetName: presetName) else {
             print("export session error")
             return
         }

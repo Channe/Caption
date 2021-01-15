@@ -55,14 +55,22 @@ class SubtitleItem: NSObject {
         
         parentLayer.addSublayer(textLayer)
         
-        let fadeInFadeOutAnimation = CAKeyframeAnimation(keyPath: "oopacity")
-        fadeInFadeOutAnimation.values = [0.0, 1.0, 1.0, 0.0]
-        fadeInFadeOutAnimation.keyTimes = [0.0, 0.2, 0.8, 1.0]
-        fadeInFadeOutAnimation.beginTime = CMTimeGetSeconds(self.timeRange.start)
-        fadeInFadeOutAnimation.duration = CMTimeGetSeconds(self.timeRange.duration)
-        fadeInFadeOutAnimation.isRemovedOnCompletion = false
+        // fadeinfadeout
+        let animation = CAKeyframeAnimation(keyPath: #keyPath(CALayer.opacity))
         
-        parentLayer.add(fadeInFadeOutAnimation, forKey: nil)
+        // 淡入：从透明到不透明，淡出：再从不透明到透明
+        animation.values = [0.0, 1.0, 1.0, 0.0]
+        // 每段动画执行的时间点，10%的时间淡入，10%的时间淡出
+        animation.keyTimes = [0.0, 0.1, 0.9, 1.0]
+        
+        // 设置起始时间，如果要表示影片片头，不能用 0.0 来赋值 beginTime，因为 CoreAnimation 会将 0.0 的 beginTime 转为 CACurrentMediaTime()，所以要用 AVCoreAnimationBeginTimeAtZero 来代替
+//        animation.beginTime = CMTimeGetSeconds(self.timeRange.start)
+        animation.beginTime = CMTimeGetSeconds(CMTime(seconds: 1, preferredTimescale: 1))
+        animation.duration = CMTimeGetSeconds(self.timeRange.duration)
+        
+        animation.isRemovedOnCompletion = false
+        
+        parentLayer.add(animation, forKey: nil)
         
         return parentLayer
     }

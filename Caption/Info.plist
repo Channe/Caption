@@ -32,6 +32,10 @@
 	<string>Capture Video</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Capture Video</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save Video</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Save Video</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

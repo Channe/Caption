@@ -10,7 +10,7 @@ import AVFoundation
 
 class VideoPlayerViewController: UIViewController {
     
-    private var playerControlloer: PlayerController
+    private var playerController: PlayerController
     private var captionGenerator: AudioCaptionGenerator
     
     private lazy var saveBtn: UIButton = {
@@ -50,7 +50,7 @@ class VideoPlayerViewController: UIViewController {
     }()
     
     init(videoURL: URL) {
-        self.playerControlloer = PlayerController(URL: videoURL)
+        self.playerController = PlayerController(URL: videoURL)
         
         // 语音转文字
         self.captionGenerator = AudioCaptionGenerator(URL: URL(fileURLWithPath: savePath))
@@ -74,7 +74,7 @@ class VideoPlayerViewController: UIViewController {
                 let text = self.captionGenerator.finalText
                 //TODO: qianlei 显示字幕
                 print("finalText:\(text)")
-                self.addSubtitle(text)
+                self.playerController.displaySubtitle(text)
             }
         }
     }
@@ -100,7 +100,7 @@ class VideoPlayerViewController: UIViewController {
     
     private func configPlayerViews() {
         
-        let playerView = self.playerControlloer.playerView
+        let playerView = self.playerController.playerView
         self.view.addSubview(playerView)
         playerView.snp.makeConstraints { (maker) in
             maker.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 0, bottom: 64, right: 0))
@@ -127,25 +127,6 @@ class VideoPlayerViewController: UIViewController {
         }
     }
     
-    func addSubtitle(_ text: String) {
-        let syncLayer = AVSynchronizedLayer(playerItem: self.playerControlloer.playerItem)
-        
-        let font = TTFontB(26)
-        let textWidth = self.view.bounds.width - 20*2
-        let textHeight = text.height(withConstrainedWidth: textWidth, font: font)
-//        let textHeight = CGFloat(400)
-        let size = CGSize(width: textWidth, height: textHeight)
-//        let playerSize = self.playerControlloer.playerView.bounds.size
-        
-        let subtitleItem = SubtitleItem(text: text, timestamp: 0, duration: 12, size: size, font: font)
-        
-        syncLayer.addSublayer(subtitleItem.buildLayer())
-        syncLayer.frame = CGRect(x: 20, y: 200, width: textWidth, height: textHeight)
-        
-        self.playerControlloer.playerView.layer.addSublayer(syncLayer)
-        
-    }
-    
     @objc private func failedRetryBtnAction() {
         // 点击重试
         self.captionGenerator.startFromFile()
@@ -153,8 +134,36 @@ class VideoPlayerViewController: UIViewController {
     
     @objc private func saveBtnAction() {
         //TODO: Qianlei 合成带字幕的新视频
-        //TODO: qianlei 沙盒文件保存到系统相册
         
+        let outputPath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/export.mp4"
+        let outputURL = URL(fileURLWithPath: outputPath)
+        
+        if FileManager.default.fileExists(atPath: outputPath) {
+            do {
+                try FileManager.default.removeItem(atPath: outputPath)
+            } catch {
+                print("cannot remove exist video file")
+            }
+        }
+
+        Toast.showTips("exporting...")
+        
+        self.playerController.exportVideo(URL: outputURL) { (result) in
+
+            switch result {
+            
+            case .success(_):
+                //TODO: qianlei 沙盒文件保存到系统相册
+                Toast.showTips("export success.")
+                PhotosTools.saveToAlbum(fromURL: outputURL)
+                break
+            case .failure(_):
+                Toast.showTips("export failure.")
+
+                break
+            }
+        }
+
     }
     
 }

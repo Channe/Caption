@@ -49,11 +49,9 @@ class AudioCaptionGenerator: NSObject {
                 case .notDetermined:
                     break
                 case .denied:
-                    //TODO: qianlei 跳转 App 设置页面，提示用户打开权限
-                    break
+                    SysFunc.openAppSettings()
                 case .restricted:
-                    //TODO: qianlei 跳转 App 设置页面，提示用户打开权限
-                    break
+                    SysFunc.openAppSettings()
                 @unknown default:
                     break
                 }
