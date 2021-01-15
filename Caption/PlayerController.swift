@@ -119,15 +119,15 @@ class PlayerController: NSObject {
         self.session = nil
         
         // 音轨轨迹和视频轨迹
-        let startTime = CMTime.zero
+        let cursorTime = CMTime.zero
         let sourceAsset = self.asset
-        let timeRange = CMTimeRange(start: startTime, duration: sourceAsset.duration)
+        let timeRange = CMTimeRange(start: cursorTime, duration: sourceAsset.duration)
         
         do {
             let videoTrack = self.composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
             let sourceVideoTrack = sourceAsset.tracks(withMediaType: .video).first!
             
-            try videoTrack?.insertTimeRange(timeRange, of: sourceVideoTrack, at: startTime)
+            try videoTrack?.insertTimeRange(timeRange, of: sourceVideoTrack, at: cursorTime)
         } catch {
             print("插入合成视频轨迹， 视频有错误")
             finish(.failure(.create))
@@ -137,7 +137,7 @@ class PlayerController: NSObject {
             let audioTrack = self.composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
             let sourceAudioTrack = sourceAsset.tracks(withMediaType: .audio).first!
             
-            try audioTrack?.insertTimeRange(timeRange, of: sourceAudioTrack, at: startTime)
+            try audioTrack?.insertTimeRange(timeRange, of: sourceAudioTrack, at: cursorTime)
         } catch {
             print("插入合成视频轨迹， 音频有错误")
             finish(.failure(.create))
@@ -167,6 +167,7 @@ class PlayerController: NSObject {
                     finish(.success(URL))
                 case .failed:
                     print("AVAssetExportSessionStatus failed")
+                    print(session.error as Any)
                     finish(.failure(.custom("failed")))
                 case .cancelled:
                     print("AVAssetExportSessionStatus cancelled")
@@ -200,18 +201,12 @@ class PlayerController: NSObject {
             session.outputFileType = session.supportedFileTypes.first!
         }
         
-//        let videoComposition = AVMutableVideoComposition()
-                
-        //TODO: 导出时带上字幕
+        var videoComposition = AVMutableVideoComposition(propertiesOf: self.composition)
+//        videoComposition.renderSize = CGSize(width: 320, height: 568)
+        videoComposition = fixedComposition(composition: videoComposition, orientation: self.asset.videoOrientation)
+
+        // 导出时带上字幕
         if let subtitleLayer = self.subtitleLayer {
-            let videoComposition = AVMutableVideoComposition(propertiesOf: self.composition)
-            
-            //TODO: qianlei videoComposition.renderSize
-//            videoComposition.renderSize = self.playerView.bounds.size
-//            videoComposition.renderScale = 1.0
-//            videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
-//            videoComposition.instructions = ?
-            
             let animationLayer = CALayer()
             animationLayer.frame = self.playerView.bounds
             
@@ -233,8 +228,52 @@ class PlayerController: NSObject {
         return session
     }
     
-    private func fixedComposition(degree: Int) {
+    private func fixedComposition(composition: AVMutableVideoComposition, orientation: AVCaptureVideoOrientation) -> AVMutableVideoComposition {
+        guard orientation != .landscapeRight else {
+            return composition
+        }
         
+        guard let videoTrack = self.asset.tracks(withMediaType: .video).first else {
+            return composition
+        }
+        
+        var translateToCenter: CGAffineTransform
+        var mixedTransform: CGAffineTransform
+
+        let rotateInstruction = AVMutableVideoCompositionInstruction()
+        rotateInstruction.timeRange = CMTimeRange(start: CMTime.zero, duration: self.asset.duration)
+        
+        let rotateLayerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
+        
+        let naturalSize = videoTrack.naturalSize
+        
+        if orientation == .portrait {
+            // 顺时针旋转90°
+            translateToCenter = CGAffineTransform(translationX: naturalSize.height, y: 0.0)
+            mixedTransform = translateToCenter.rotated(by: CGFloat(Double.pi / 2))
+            
+            composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
+            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
+        } else if orientation == .landscapeLeft {
+            // 顺时针旋转180°
+            translateToCenter = CGAffineTransform(translationX: naturalSize.width, y: naturalSize.height)
+            mixedTransform = translateToCenter.rotated(by: CGFloat(Double.pi))
+            
+            composition.renderSize = CGSize(width: naturalSize.width, height: naturalSize.height)
+            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
+        } else if orientation == .portraitUpsideDown {
+            // 顺时针旋转270°
+            translateToCenter = CGAffineTransform(translationX: 0.0, y: naturalSize.width)
+            mixedTransform = translateToCenter.rotated(by: CGFloat((Double.pi / 2) * 3.0))
+            
+            composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
+            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
+        }
+        
+        rotateInstruction.layerInstructions = [rotateLayerInstruction]
+        composition.instructions = [rotateInstruction]
+        
+        return composition
     }
     
     

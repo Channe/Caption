@@ -18,6 +18,8 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         picker.mediaTypes = [kUTTypeMovie as String]
         picker.sourceType = .photoLibrary
         picker.videoMaximumDuration = 60
+        picker.videoQuality = .typeHigh
+        picker.videoExportPreset = AVAssetExportPresetHighestQuality
         picker.allowsEditing = true
         picker.delegate = self
         
@@ -307,7 +309,8 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-
+        
+        // 获取编辑后的视频 URL
         guard let mediaURL = info[UIImagePickerController.InfoKey.mediaURL] as? NSURL,
               let videoURL = URL(string: mediaURL.absoluteString!) else {
             picker.dismiss(animated: true, completion: nil)
@@ -334,44 +337,74 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             print("cannot export")
             return
         }
-        
-//        let presetName = AVAssetExportPresetPassthrough 
+
+        let composition = AVMutableComposition()
+
+        // 音轨轨迹和视频轨迹
+        let cursorTime = CMTime.zero
+        let sourceAsset = asset
+        let timeRange = CMTimeRange(start: cursorTime, duration: sourceAsset.duration)
+
+        do {
+            let videoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
+            let sourceVideoTrack = sourceAsset.tracks(withMediaType: .video).first!
+            
+            try videoTrack?.insertTimeRange(timeRange, of: sourceVideoTrack, at: cursorTime)
+        } catch {
+            print("插入合成视频轨迹， 视频有错误")
+        }
+
+        do{
+            let audioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
+            let sourceAudioTrack = sourceAsset.tracks(withMediaType: .audio).first!
+            
+            try audioTrack?.insertTimeRange(timeRange, of: sourceAudioTrack, at: cursorTime)
+        } catch {
+            print("插入合成视频轨迹， 音频有错误")
+        }
+
         let presetName = AVAssetExportPresetHighestQuality
-        
-        guard let exportSession = AVAssetExportSession(asset: asset, presetName: presetName) else {
-            print("export session error")
+
+        guard let session = AVAssetExportSession(asset: composition, presetName: presetName) else {
+            print("AVAssetExportSession error")
             return
         }
-        exportSession.outputURL = URL(fileURLWithPath: savePath)
-        exportSession.outputFileType = .mp4
-        exportSession.exportAsynchronously {
-            
-            print("export video...: \(savePath)")
-            let status = exportSession.status
-            
-            switch status {
-            
-            case .unknown:
-                break
-            case .waiting:
-                break
-            case .exporting:
-                break
-            case .completed:
-                print("export video completed")
-                DispatchQueue.main.async {
+        session.shouldOptimizeForNetworkUse = true
+
+        if session.supportedFileTypes.contains(.mp4) {
+            session.outputFileType = .mp4
+        } else {
+            session.outputFileType = session.supportedFileTypes.first!
+        }
+
+        session.outputURL = URL(fileURLWithPath: savePath)
+
+        session.exportAsynchronously {
+            DispatchQueue.main.async {
+                print("export video...: \(savePath)")
+                let status = session.status
+                
+                switch status {
+                
+                case .unknown:
+                    break
+                case .waiting:
+                    break
+                case .exporting:
+                    break
+                case .completed:
+                    print("export video completed")
                     self.showCancelBtn(true)
+                case .failed:
+                    print(session.error as Any)
+                    Toast.showTips(session.error!.localizedDescription)
+                    print("export video failed")
+                case .cancelled:
+                    break
+                @unknown default:
+                    break
                 }
-            case .failed:
-                print(exportSession.error as Any)
-                Toast.showTips(exportSession.error!.localizedDescription)
-                print("export video failed")
-            case .cancelled:
-                break
-            @unknown default:
-                break
             }
-            
         }
     }
     

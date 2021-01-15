@@ -206,7 +206,7 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
         
         if connection.isVideoOrientationSupported {
             // 获取设备方向
-            connection.videoOrientation = AVCaptureVideoOrientation(ui:UIDevice.current.orientation)
+            connection.videoOrientation = AVCaptureVideoOrientation(orientation: UIDevice.current.orientation)
         }
         
         if connection.isVideoStabilizationSupported {
@@ -240,6 +240,7 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
             }
         }
         
+        //TODO: qianlei 录制的视频本身有问题？
         self.movieOutput.startRecording(to: self.outputURL, recordingDelegate: self)
     }
     
@@ -299,27 +300,35 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
 }
 
 extension AVCaptureVideoOrientation {
-    var uiDeviceOrientation: UIDeviceOrientation {
+    var uiInterfaceOrientation: UIInterfaceOrientation {
         get {
             switch self {
             case .landscapeLeft:        return .landscapeLeft
             case .landscapeRight:       return .landscapeRight
             case .portrait:             return .portrait
             case .portraitUpsideDown:   return .portraitUpsideDown
-            @unknown default:
-                return .portrait
             }
         }
     }
     
-    // AVCaptureVideoOrientation(ui:UIDevice.current.orientation)
-    init(ui:UIDeviceOrientation) {
+    init(ui:UIInterfaceOrientation) {
         switch ui {
         case .landscapeRight:       self = .landscapeRight
         case .landscapeLeft:        self = .landscapeLeft
         case .portrait:             self = .portrait
         case .portraitUpsideDown:   self = .portraitUpsideDown
         default:                    self = .portrait
+        }
+    }
+    
+    init(orientation:UIDeviceOrientation) {
+        switch orientation {
+        case .landscapeRight:       self = .landscapeLeft
+        case .landscapeLeft:        self = .landscapeRight
+        case .portrait:             self = .portrait
+        case .portraitUpsideDown:   self = .portraitUpsideDown
+        default:
+            self = .portrait
         }
     }
 }

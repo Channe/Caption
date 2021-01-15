@@ -63,9 +63,11 @@ class SubtitleItem: NSObject {
         // 每段动画执行的时间点，10%的时间淡入，10%的时间淡出
         animation.keyTimes = [0.0, 0.1, 0.9, 1.0]
         
+        //TODO: qianlei animation.beginTime
         // 设置起始时间，如果要表示影片片头，不能用 0.0 来赋值 beginTime，因为 CoreAnimation 会将 0.0 的 beginTime 转为 CACurrentMediaTime()，所以要用 AVCoreAnimationBeginTimeAtZero 来代替
 //        animation.beginTime = CMTimeGetSeconds(self.timeRange.start)
         animation.beginTime = CMTimeGetSeconds(CMTime(seconds: 1, preferredTimescale: 1))
+        
         animation.duration = CMTimeGetSeconds(self.timeRange.duration)
         
         animation.isRemovedOnCompletion = false

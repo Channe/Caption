@@ -155,7 +155,7 @@ class VideoPlayerViewController: UIViewController {
             case .success(_):
                 //TODO: qianlei 沙盒文件保存到系统相册
                 Toast.showTips("export success.")
-                PhotosTools.saveToAlbum(fromURL: outputURL)
+                PhotosTools.saveVideoToAlbum(fromURL: outputURL)
                 break
             case .failure(_):
                 Toast.showTips("export failure.")

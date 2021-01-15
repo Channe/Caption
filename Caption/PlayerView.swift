@@ -21,7 +21,8 @@ class PlayerView: UIView {
         self.backgroundColor = .clear
         
         let layer = self.layer as! AVPlayerLayer
-        layer.videoGravity = .resizeAspectFill
+//        layer.videoGravity = .resizeAspectFill
+        layer.videoGravity = .resizeAspect
         
         layer.player = player
         

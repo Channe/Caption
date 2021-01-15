@@ -11,21 +11,21 @@ extension AVAsset {
     
     var videoOrientation: AVCaptureVideoOrientation {
         guard let videoTrack = self.tracks(withMediaType: .video).first else {
-            return .portrait
+            return .landscapeRight
         }
         
         let t = videoTrack.preferredTransform
         
         if t.a == 0 && t.b == 1.0 && t.c == -1.0 && t.d == 0 {
-            return .portrait
+            return .portrait // 90
         } else if t.a == 0 && t.b == -1.0 && t.c == 1.0 && t.d == 0 {
-            return .portraitUpsideDown
+            return .portraitUpsideDown // 270
         } else if t.a == 1.0 && t.b == 0 && t.c == 0 && t.d == 1.0 {
-            return .landscapeRight
+            return .landscapeRight // 0
         } else if t.a == -1.0 && t.b == 0 && t.c == 0 && t.d == -1.0 {
-            return .landscapeLeft
+            return .landscapeLeft // 180
         } else {
-            return .portrait
+            return .landscapeRight
         }
     }
     

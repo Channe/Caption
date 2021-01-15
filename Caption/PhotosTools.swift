@@ -9,8 +9,13 @@ import UIKit
 import Photos
 
 class PhotosTools {
+    
+    static func readVideoFromAlbum(fromURL: URL, toURL: URL) {
+        //TODO: Qianlei 从相册读取视频到沙盒
+        
+    }
 
-    static func saveToAlbum(fromURL: URL) {
+    static func saveVideoToAlbum(fromURL: URL) {
         
         PHPhotoLibrary.requestAuthorization { (auth) in
             
@@ -28,7 +33,7 @@ class PhotosTools {
                         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fromURL)
                     } completionHandler: { (success, error) in
                         if error != nil {
-                            print("saveToAlbum error:\(error!)")
+                            print("saveVideoToAlbum error:\(error!)")
                         }
                         Toast.showTips("Save to album \(success ? "sucess" : "failed")")
                     }
