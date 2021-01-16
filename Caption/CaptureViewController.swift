@@ -294,7 +294,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         if gesture.state == .began {
             // 长按开始
-            SysFunc.feedbackGenerator()
+//            SysFunc.feedbackGenerator()
             self.captureController?.startReordingMovie()
         } else if gesture.state == .ended {
             // 长按结束

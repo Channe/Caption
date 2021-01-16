@@ -62,16 +62,13 @@ class CaptureController: NSObject {
     private func setupSession() {
         
         // 默认是前置摄像头
-        //TODO: qianlei 预览和实际拍摄的画面有差异
         let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
         
         do {
             let input = try AVCaptureDeviceInput(device: camera!)
             if captureSession.canAddInput(input){
                 captureSession.addInput(input)
-                
                 self.activeInput = input
-                // 添加拍照， 录像的输入
             }
         } catch {
             print("Error settings device input: \(error)")
@@ -91,6 +88,36 @@ class CaptureController: NSObject {
         
         if captureSession.canAddOutput(movieOutput){
             captureSession.addOutput(movieOutput)
+        }
+        
+        guard let device = self.activeInput?.device else {
+            return
+        }
+        
+        //应立即设置 self.movieOutput.connection，否则预览和实际拍摄的画面有差异
+        guard let connection = self.movieOutput.connection(with: .video) else {
+            return
+        }
+        
+        if connection.isVideoStabilizationSupported {
+            connection.preferredVideoStabilizationMode = .auto
+        }
+        
+        if connection.isVideoOrientationSupported {
+            // 获取设备方向
+            let orientation = AVCaptureVideoOrientation(orientation: UIDevice.current.orientation)
+            connection.videoOrientation = orientation
+        } else {
+            print("")
+        }
+        
+        if connection.isVideoMirroringSupported {
+            // 只有前置摄像头需要镜像
+            if device.position == .front {
+                connection.isVideoMirrored = true
+            } else {
+                connection.isVideoMirrored = false
+            }
         }
         
     }
@@ -199,27 +226,6 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
         }
         guard let device = self.activeInput?.device else {
             return
-        }
-        guard let connection = self.movieOutput.connection(with: .video) else {
-            return
-        }
-        
-        if connection.isVideoOrientationSupported {
-            // 获取设备方向
-            connection.videoOrientation = AVCaptureVideoOrientation(orientation: UIDevice.current.orientation)
-        }
-        
-        if connection.isVideoStabilizationSupported {
-            connection.preferredVideoStabilizationMode = .auto
-        }
-        
-        if connection.isVideoMirroringSupported {
-            // 只有前置摄像头需要镜像
-            if device.position == .front {
-                connection.isVideoMirrored = true
-            } else {
-                connection.isVideoMirrored = false
-            }
         }
         
         if device.isSmoothAutoFocusSupported {
