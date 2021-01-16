@@ -72,9 +72,14 @@ class VideoPlayerViewController: UIViewController {
             
             if success {
                 let text = self.captionGenerator.finalText
-                //TODO: qianlei 显示字幕
+                // 显示字幕
                 print("finalText:\(text)")
-                self.playerController.addSubtitle(text)
+                
+                //TODO: qianlei 字幕时间
+                let subtitleItem = SubtitleItem(text: text, timestamp: 1, duration: 5, font: TTFontB(26))
+                let subtitleItem2 = SubtitleItem(text: "第二段字幕 test", timestamp: 6, duration: 5, font: TTFontB(20))
+
+                self.playerController.displaySubtitles([subtitleItem, subtitleItem2])
             }
         }
     }

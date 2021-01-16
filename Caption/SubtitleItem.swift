@@ -14,30 +14,64 @@ class SubtitleItem: NSObject {
     private(set) var timeRange: CMTimeRange
     private(set) var font: UIFont
     
-    init(text: String, timestamp:TimeInterval, duration: TimeInterval, font: UIFont) {
+    private(set) var textX: CGFloat
+    private(set) var textY: CGFloat
+    
+    // 仔细设置字幕的 frame，以便播放时和导出时字幕位置一致
+    private(set) var textXRate: CGFloat? = nil
+    private(set) var textYRate: CGFloat? = nil
+    
+    init(text: String, timestamp:TimeInterval, duration: TimeInterval, font: UIFont, textX: CGFloat = 20, textY: CGFloat = 260) {
         
         self.text = text
         self.timeRange = CMTimeRange(start: CMTime(seconds: timestamp, preferredTimescale: 600),
                                      duration: CMTime(seconds: duration, preferredTimescale: 600))
         self.font = font
         
+        self.textX = textX
+        self.textY = textY
+        
         super.init()
         
     }
     
-    func buildLayer(frame: CGRect) -> CALayer {
-        // 需要在这里设置字幕的 frame，以便播放时和导出时字幕位置一致
-
+    // 预览时，字幕宽高使用显示控件的宽高；
+    func displayLayer(textX:CGFloat, textY:CGFloat, superWidth: CGFloat, superHeight: CGFloat) -> CALayer {
+        
+        self.textXRate = textX / superWidth
+        self.textYRate = textY / superHeight
+        
+        return buildLayer(textX: textX, textY: textY, superWidth: superWidth)
+    }
+    
+    // 导出时，字幕宽高使用视频本身的宽高；
+    func exportLayer(superWidth: CGFloat, superHeight: CGFloat) -> CALayer {
+        
+        let textX = self.textXRate! * superWidth
+        let textY = self.textYRate! * superHeight
+        
+        return buildLayer(textX: textX, textY: textY, superWidth: superWidth)
+    }
+    
+    private func buildLayer(textX:CGFloat, textY:CGFloat, superWidth: CGFloat) -> CALayer {
+        
+        // 字幕宽度固定，高度根据字体动态计算
+        let textWidth = superWidth - textX*2
+        let textHeight = self.text.height(withConstrainedWidth: textWidth, font: self.font)
+        let textFrame = CGRect(x: textX, y: textY, width: textWidth, height: textHeight)
+        
         let parentLayer = CALayer()
-        parentLayer.frame = frame
-//        parentLayer.contentsScale = UIScreen.main.scale
-
+        parentLayer.frame = CGRect(x: textX, y: textY, width: textWidth, height: textHeight)
+        // 默认隐藏，通过淡入动画来显示
+        parentLayer.opacity = 0.0
+        
         let textLayer = CATextLayer()
         textLayer.string = self.text
-        textLayer.frame = CGRect(origin: .zero, size: frame.size)
+        textLayer.frame = CGRect(origin: .zero, size: textFrame.size)
         textLayer.backgroundColor = UIColor.clear.cgColor
         textLayer.contentsScale = UIScreen.main.scale
         textLayer.isWrapped = true
+        textLayer.alignmentMode = .left
         /*
          CATextLayer
          var font: CFTypeRef? { get set }
@@ -45,7 +79,7 @@ class SubtitleItem: NSObject {
          
          UIFont 赋值给 CFTypeRef 并没有报错，但实际使用的字体大小并不是设置的20，而是36
          */
-//        textLayer.font = self.font // 错误
+        //        textLayer.font = self.font // 错误
         
         // 正确设置 font
         textLayer.font = CGFont(self.font.fontName as CFString)
@@ -63,8 +97,8 @@ class SubtitleItem: NSObject {
         
         //TODO: qianlei animation.beginTime
         // 设置起始时间，如果要表示影片片头，不能用 0.0 来赋值 beginTime，因为 CoreAnimation 会将 0.0 的 beginTime 转为 CACurrentMediaTime()，所以要用 AVCoreAnimationBeginTimeAtZero 来代替
-//        animation.beginTime = CMTimeGetSeconds(self.timeRange.start)
-        animation.beginTime = CMTimeGetSeconds(CMTime(seconds: 1, preferredTimescale: 1))
+        animation.beginTime = CMTimeGetSeconds(self.timeRange.start)
+//        animation.beginTime = CMTimeGetSeconds(CMTime(seconds: 1, preferredTimescale: 1))
         
         animation.duration = CMTimeGetSeconds(self.timeRange.duration)
         
@@ -74,6 +108,5 @@ class SubtitleItem: NSObject {
         
         return parentLayer
     }
-    
     
 }

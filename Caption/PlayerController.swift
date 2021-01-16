@@ -85,30 +85,24 @@ class PlayerController: NSObject {
         }
     }
     
-    private var subtitleLayer: CALayer? = nil
-    func addSubtitle(_ text: String) {
-        let font = TTFontB(26)
+    // 播放时增加字幕，处理多段字幕
+    private var subtitleItems: [SubtitleItem] = []
+    
+    func displaySubtitles(_ subtitleItems: [SubtitleItem]) {
+        self.subtitleItems = subtitleItems
         
-        let videoTrack = self.asset.tracks(withMediaType: .video).first!
-        let naturalSize = videoTrack.naturalSize
+        let playerSize = self.playerView.bounds.size
         
-        // 字幕宽度固定，高度根据字体动态计算
-        let textWidth = naturalSize.width - 20*2
-        let textHeight = text.height(withConstrainedWidth: textWidth, font: font)
-        let textFrame = CGRect(x: 20, y: 400, width: textWidth, height: textHeight)
+        // 预览时，字幕宽高使用显示控件的宽高；
         
-        //TODO: Qianlei 字幕时间
-        let subtitleItem = SubtitleItem(text: text, timestamp: 0, duration: 5, font: font)
-        
-        self.subtitleLayer = subtitleItem.buildLayer(frame: textFrame)
-        
-        let syncLayer = AVSynchronizedLayer(playerItem: self.playerItem)
-        syncLayer.addSublayer(self.subtitleLayer!)
-        // 字幕位置, AVSynchronizedLayer只能决定播放时字幕位置
-//        syncLayer.frame = CGRect(x: 20, y: 400, width: textWidth, height: textHeight)
-        
-        self.playerView.layer.addSublayer(syncLayer)
-        
+        self.subtitleItems.forEach { (subtitleItem) in
+            let subtitleLayer = subtitleItem.displayLayer(textX: subtitleItem.textX, textY: subtitleItem.textY, superWidth: playerSize.width, superHeight: playerSize.height)
+            
+            let syncLayer = AVSynchronizedLayer(playerItem: self.playerItem)
+            syncLayer.addSublayer(subtitleLayer)
+            
+            self.playerView.layer.addSublayer(syncLayer)
+        }
     }
     
     //MARK: - 导出视频
@@ -168,6 +162,8 @@ class PlayerController: NSObject {
     
     private func buildExportSession(_ composition: AVMutableComposition) -> AVAssetExportSession? {
         
+        // 不管输入的视频尺寸是多少，转换的视频统一尺寸为 1080p ?
+//        let presetName = AVAssetExportPreset1920x1080
         let presetName = AVAssetExportPresetHighestQuality
         
         let presets = AVAssetExportSession.exportPresets(compatibleWith: composition)
@@ -193,23 +189,27 @@ class PlayerController: NSObject {
             session.videoComposition = videoComposition
         }
 
-        // 导出时带上字幕
-        if let subtitleLayer = self.subtitleLayer {
+        // 导出时加上字幕
+        if self.subtitleItems.count > 0 {
             
             let bounds = CGRect(origin: .zero, size: composition.naturalSize)
+            let naturalSize = composition.naturalSize
             
             let animationLayer = CALayer()
             animationLayer.frame = bounds
-//            animationLayer.contentsScale = UIScreen.main.scale
-
+            
             let videoPlayer = CALayer()
             videoPlayer.frame = bounds
-//            animationLayer.contentsScale = UIScreen.main.scale
             
             animationLayer.addSublayer(videoPlayer)
-            animationLayer.addSublayer(subtitleLayer)
-            
             animationLayer.isGeometryFlipped = true // 避免错位现象
+
+            // 处理多段字幕
+            self.subtitleItems.forEach { (subtitleItem) in
+                
+                let subtitleLayer = subtitleItem.exportLayer(superWidth: naturalSize.width, superHeight: naturalSize.height)
+                animationLayer.addSublayer(subtitleLayer)
+            }
             
             let animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: videoPlayer, in: animationLayer)
             
