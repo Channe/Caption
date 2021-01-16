@@ -13,11 +13,13 @@ let savePath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomain
 
 class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
+    private let videoMaxDuration: TimeInterval  = 60.0
+    
     private lazy var imagePicker: UIImagePickerController = {
         let picker = UIImagePickerController()
         picker.mediaTypes = [kUTTypeMovie as String]
         picker.sourceType = .photoLibrary
-        picker.videoMaximumDuration = 60
+        picker.videoMaximumDuration = videoMaxDuration
         picker.videoQuality = .typeHigh
         picker.videoExportPreset = AVAssetExportPresetHighestQuality
         picker.allowsEditing = true
@@ -54,7 +56,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     private lazy var cancelBtn: UIButton = {
         let btn = TTButton(title: "NO", target: self , action: #selector(cancelCaptureAction))
         btn.layer.masksToBounds = true
-        btn.layer.cornerRadius = 36/2
+        btn.layer.cornerRadius = 50/2
         btn.isHidden = true
         return btn
     }()
@@ -62,7 +64,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     private lazy var nextBtn: UIButton = {
         let btn = TTButton(title: "OK", target: self , action: #selector(nextBtnAction))
         btn.layer.masksToBounds = true
-        btn.layer.cornerRadius = 36/2
+        btn.layer.cornerRadius = 50/2
         btn.isHidden = true
         return btn
     }()
@@ -173,14 +175,14 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         self.view.addSubview(self.cancelBtn)
         self.cancelBtn.snp.makeConstraints { (maker) in
             maker.right.equalTo(self.startCaptureView.snp.left).offset(-40)
-            maker.width.height.equalTo(36)
+            maker.width.height.equalTo(50)
             maker.centerY.equalTo(self.startCaptureView)
         }
         
         self.view.addSubview(self.nextBtn)
         self.nextBtn.snp.makeConstraints { (maker) in
             maker.left.equalTo(self.startCaptureView.snp.right).offset(40)
-            maker.width.height.equalTo(36)
+            maker.width.height.equalTo(50)
             maker.centerY.equalTo(self.startCaptureView)
         }
     }
@@ -226,11 +228,13 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             return
         }
         
-        self.durationLabel.text = "\(String(format: "%.0f", duration))s"
+        let displayDuration = round(duration)
+        self.durationLabel.text = "\(String(format: "%.0f", displayDuration))s"
+
         self.durationLabel.backgroundColor = .clear
         
         self.circelGradientView.isHidden = false
-        self.circelGradientView.progess = CGFloat(duration / 60.0)
+        self.circelGradientView.progess = CGFloat(duration / videoMaxDuration)
     }
     
     //MARK: - Actions
@@ -283,11 +287,11 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         captureController.switchCamera()
         
-        if captureController.isFlashEnable {
-            self.flashBtn.isHidden = false
-        } else {
-            self.flashBtn.isHidden = true
-        }
+//        if captureController.isFlashEnable {
+//            self.flashBtn.isHidden = false
+//        } else {
+//            self.flashBtn.isHidden = true
+//        }
         
     }
     

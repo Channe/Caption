@@ -273,7 +273,7 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
             }
         }
         
-        //TODO: qianlei 录制的视频本身有问题？
+        // 开始录制视频
         self.movieOutput.startRecording(to: self.outputURL, recordingDelegate: self)
     }
     

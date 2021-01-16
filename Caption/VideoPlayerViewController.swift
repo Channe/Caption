@@ -76,10 +76,11 @@ class VideoPlayerViewController: UIViewController {
                 print("finalText:\(text)")
                 
                 //TODO: qianlei 字幕时间
-                let subtitleItem = SubtitleItem(text: text, timestamp: 1, duration: 5, font: TTFontB(26))
-                let subtitleItem2 = SubtitleItem(text: "第二段字幕 test", timestamp: 6, duration: 5, font: TTFontB(20))
+                let font = TTFontB(26)
+                let subtitleItem1 = SubtitleItem(text: text, timestamp: 1, duration: 5, font: font)
+                let subtitleItem2 = SubtitleItem(text: "第二段字幕 test", timestamp: 6, duration: 5, font: font)
 
-                self.playerController.displaySubtitles([subtitleItem, subtitleItem2])
+                self.playerController.displaySubtitles([subtitleItem1, subtitleItem2])
             }
         }
     }
@@ -115,7 +116,7 @@ class VideoPlayerViewController: UIViewController {
         self.saveBtn.snp.makeConstraints { (maker) in
             maker.right.equalToSuperview().offset(-20)
             maker.bottom.equalToSuperview().offset(-20)
-            maker.width.height.equalTo(44)
+            maker.width.height.equalTo(60)
         }
         
         self.view.addSubview(self.captioningView)
