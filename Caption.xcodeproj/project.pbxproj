@@ -23,6 +23,7 @@
 		9771DC5225B072FC00EA7239 /* SubtitleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DC5125B072FC00EA7239 /* SubtitleItem.swift */; };
 		9771DC7125B188B200EA7239 /* AVAssetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DC7025B188B200EA7239 /* AVAssetExtension.swift */; };
 		9771DC7725B18E6500EA7239 /* PhotosTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DC7625B18E6500EA7239 /* PhotosTools.swift */; };
+		9771DC8D25B28BF200EA7239 /* VideoTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DC8C25B28BF100EA7239 /* VideoTools.swift */; };
 		97766D9325AAEB83003AF31D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97766D9225AAEB83003AF31D /* AppDelegate.swift */; };
 		97766D9C25AAEB85003AF31D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9B25AAEB85003AF31D /* Assets.xcassets */; };
 		97766D9F25AAEB85003AF31D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97766D9D25AAEB85003AF31D /* LaunchScreen.storyboard */; };
@@ -66,6 +67,7 @@
 		9771DC5125B072FC00EA7239 /* SubtitleItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleItem.swift; sourceTree = "<group>"; };
 		9771DC7025B188B200EA7239 /* AVAssetExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVAssetExtension.swift; sourceTree = "<group>"; };
 		9771DC7625B18E6500EA7239 /* PhotosTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosTools.swift; sourceTree = "<group>"; };
+		9771DC8C25B28BF100EA7239 /* VideoTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTools.swift; sourceTree = "<group>"; };
 		97766D8F25AAEB83003AF31D /* Caption.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Caption.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97766D9225AAEB83003AF31D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		97766D9B25AAEB85003AF31D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				9771DBF025AE154C00EA7239 /* CaptureController.swift */,
 				9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */,
 				9771DBDC25AC74B000EA7239 /* PlayerController.swift */,
+				9771DC8C25B28BF100EA7239 /* VideoTools.swift */,
 				9771DC7025B188B200EA7239 /* AVAssetExtension.swift */,
 				9771DBD725AC5ACE00EA7239 /* PlayerView.swift */,
 				9771DC5125B072FC00EA7239 /* SubtitleItem.swift */,
@@ -363,6 +366,7 @@
 			files = (
 				9771DC5225B072FC00EA7239 /* SubtitleItem.swift in Sources */,
 				9771DBA825AC291600EA7239 /* VideoPlayerViewController.swift in Sources */,
+				9771DC8D25B28BF200EA7239 /* VideoTools.swift in Sources */,
 				9771DBC925AC38A500EA7239 /* Toast.swift in Sources */,
 				9771DBDD25AC74B000EA7239 /* PlayerController.swift in Sources */,
 				9771DBD825AC5ACE00EA7239 /* PlayerView.swift in Sources */,

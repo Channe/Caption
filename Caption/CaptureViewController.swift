@@ -334,33 +334,13 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         let asset = AVAsset(url: videoURL)
         guard asset.isExportable else {
-            print("cannot export")
+            print("cannot export,asset")
             return
         }
 
-        let composition = AVMutableComposition()
-
-        // 音轨轨迹和视频轨迹
-        let cursorTime = CMTime.zero
-        let sourceAsset = asset
-        let timeRange = CMTimeRange(start: cursorTime, duration: sourceAsset.duration)
-
-        do {
-            let videoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
-            let sourceVideoTrack = sourceAsset.tracks(withMediaType: .video).first!
-            
-            try videoTrack?.insertTimeRange(timeRange, of: sourceVideoTrack, at: cursorTime)
-        } catch {
-            print("插入合成视频轨迹， 视频有错误")
-        }
-
-        do{
-            let audioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
-            let sourceAudioTrack = sourceAsset.tracks(withMediaType: .audio).first!
-            
-            try audioTrack?.insertTimeRange(timeRange, of: sourceAudioTrack, at: cursorTime)
-        } catch {
-            print("插入合成视频轨迹， 音频有错误")
+        guard let composition = VideoTools.buildComposition(asset: asset) else {
+            print("cannot export,composition")
+            return
         }
 
         let presetName = AVAssetExportPresetHighestQuality
@@ -383,9 +363,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             DispatchQueue.main.async {
                 print("export video...: \(savePath)")
                 let status = session.status
-                
                 switch status {
-                
                 case .unknown:
                     break
                 case .waiting:

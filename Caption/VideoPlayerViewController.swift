@@ -74,7 +74,7 @@ class VideoPlayerViewController: UIViewController {
                 let text = self.captionGenerator.finalText
                 //TODO: qianlei 显示字幕
                 print("finalText:\(text)")
-                self.playerController.displaySubtitle(text)
+                self.playerController.addSubtitle(text)
             }
         }
     }
@@ -110,19 +110,20 @@ class VideoPlayerViewController: UIViewController {
         self.saveBtn.snp.makeConstraints { (maker) in
             maker.right.equalToSuperview().offset(-20)
             maker.bottom.equalToSuperview().offset(-20)
+            maker.width.height.equalTo(44)
         }
         
         self.view.addSubview(self.captioningView)
         self.captioningView.snp.makeConstraints { (maker) in
             maker.right.equalToSuperview().offset(-20)
-            maker.top.equalToSuperview().offset(90)
+            maker.top.equalToSuperview().offset(100)
             maker.height.equalTo(40)
         }
         
         self.view.addSubview(self.failedRetryBtn)
         self.failedRetryBtn.snp.makeConstraints { (maker) in
             maker.right.equalToSuperview().offset(-20)
-            maker.top.equalToSuperview().offset(90)
+            maker.top.equalToSuperview().offset(100)
             maker.height.equalTo(40)
         }
     }
@@ -153,7 +154,7 @@ class VideoPlayerViewController: UIViewController {
             switch result {
             
             case .success(_):
-                //TODO: qianlei 沙盒文件保存到系统相册
+                // 沙盒文件保存到系统相册
                 Toast.showTips("export success.")
                 PhotosTools.saveVideoToAlbum(fromURL: outputURL)
                 break

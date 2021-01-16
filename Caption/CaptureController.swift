@@ -108,7 +108,7 @@ class CaptureController: NSObject {
             let orientation = AVCaptureVideoOrientation(orientation: UIDevice.current.orientation)
             connection.videoOrientation = orientation
         } else {
-            print("")
+            print("isVideoOrientationSupported is false")
         }
         
         if connection.isVideoMirroringSupported {
@@ -268,7 +268,7 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
     
     private func startTimer() {
         cancelTimer()
-        self.timer = Timer.scheduledTimer(timeInterval: 1, target: self , selector: #selector(timerFiredAction), userInfo: nil, repeats: true)
+        self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self , selector: #selector(timerFiredAction), userInfo: nil, repeats: true)
     }
     
     private func cancelTimer() {
@@ -281,7 +281,7 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
     
     @objc private func timerFiredAction() {
         
-        self.duration += 1
+        self.duration += 0.1
         print("recording movie duration: \(self.duration)")
         
         self.recordingClosure?(self.duration)

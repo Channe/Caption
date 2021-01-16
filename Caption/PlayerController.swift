@@ -82,24 +82,26 @@ class PlayerController: NSObject {
     }
     
     private var subtitleLayer: CALayer? = nil
-    func displaySubtitle(_ text: String) {
+    func addSubtitle(_ text: String) {
         let font = TTFontB(26)
         
-        let playerSize = self.playerView.bounds.size
+        let videoTrack = self.asset.tracks(withMediaType: .video).first!
+        let naturalSize = videoTrack.naturalSize
+        
         // 字幕宽度固定，高度根据字体动态计算
-        let textWidth = playerSize.width - 20*2
+        let textWidth = naturalSize.width - 20*2
         let textHeight = text.height(withConstrainedWidth: textWidth, font: font)
-        let size = CGSize(width: textWidth, height: textHeight)
+        let textFrame = CGRect(x: 20, y: 400, width: textWidth, height: textHeight)
         
         //TODO: Qianlei 字幕时间
-        let subtitleItem = SubtitleItem(text: text, timestamp: 0, duration: 5, size: size, font: font)
+        let subtitleItem = SubtitleItem(text: text, timestamp: 0, duration: 5, font: font)
         
-        self.subtitleLayer = subtitleItem.buildLayer()
+        self.subtitleLayer = subtitleItem.buildLayer(frame: textFrame)
         
         let syncLayer = AVSynchronizedLayer(playerItem: self.playerItem)
         syncLayer.addSublayer(self.subtitleLayer!)
-        // 字幕位置
-        syncLayer.frame = CGRect(x: 20, y: 400, width: textWidth, height: textHeight)
+        // 字幕位置, AVSynchronizedLayer只能决定播放时字幕位置
+//        syncLayer.frame = CGRect(x: 20, y: 400, width: textWidth, height: textHeight)
         
         self.playerView.layer.addSublayer(syncLayer)
         
@@ -111,40 +113,20 @@ class PlayerController: NSObject {
         self.session?.cancelExport()
     }
 
-    private lazy var composition = AVMutableComposition()
     private var session: AVAssetExportSession? = nil
 
     func exportVideo(URL: URL, finish:@escaping ExportVideoFinishClosure) {
         
         self.session = nil
         
-        // 音轨轨迹和视频轨迹
-        let cursorTime = CMTime.zero
-        let sourceAsset = self.asset
-        let timeRange = CMTimeRange(start: cursorTime, duration: sourceAsset.duration)
-        
-        do {
-            let videoTrack = self.composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
-            let sourceVideoTrack = sourceAsset.tracks(withMediaType: .video).first!
-            
-            try videoTrack?.insertTimeRange(timeRange, of: sourceVideoTrack, at: cursorTime)
-        } catch {
-            print("插入合成视频轨迹， 视频有错误")
+        guard let composition = VideoTools.buildComposition(asset: self.asset) else {
+            print("export video buildComposition error")
             finish(.failure(.create))
+            return
         }
         
-        do{
-            let audioTrack = self.composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
-            let sourceAudioTrack = sourceAsset.tracks(withMediaType: .audio).first!
-            
-            try audioTrack?.insertTimeRange(timeRange, of: sourceAudioTrack, at: cursorTime)
-        } catch {
-            print("插入合成视频轨迹， 音频有错误")
-            finish(.failure(.create))
-        }
-        
-        guard let session = self.makeExportable() else {
-            print("export video makeExportable error")
+        guard let session = self.buildExportSession(composition) else {
+            print("export video buildExportSession error")
             finish(.failure(.create))
             return
         }
@@ -180,16 +162,16 @@ class PlayerController: NSObject {
 
     }
     
-    private func makeExportable() -> AVAssetExportSession? {
+    private func buildExportSession(_ composition: AVMutableComposition) -> AVAssetExportSession? {
         
         let presetName = AVAssetExportPresetHighestQuality
         
-        let presets = AVAssetExportSession.exportPresets(compatibleWith: self.composition)
+        let presets = AVAssetExportSession.exportPresets(compatibleWith: composition)
         guard presets.contains(presetName) else {
             print("AVAssetExportSession cannot support \(presetName)")
             return nil
         }
-        guard let session = AVAssetExportSession(asset: self.composition, presetName: presetName) else {
+        guard let session = AVAssetExportSession(asset: composition, presetName: presetName) else {
             print("AVAssetExportSession error")
             return nil
         }
@@ -201,17 +183,24 @@ class PlayerController: NSObject {
             session.outputFileType = session.supportedFileTypes.first!
         }
         
-        var videoComposition = AVMutableVideoComposition(propertiesOf: self.composition)
-//        videoComposition.renderSize = CGSize(width: 320, height: 568)
-        videoComposition = fixedComposition(composition: videoComposition, orientation: self.asset.videoOrientation)
+        let naturalVideoComposition = AVMutableVideoComposition(propertiesOf: composition)
+        let videoComposition = fixedComposition(naturalVideoComposition, asset: self.asset, orientation: self.asset.videoOrientation)
+        if videoComposition.renderSize.width > 0 {
+            session.videoComposition = videoComposition
+        }
 
         // 导出时带上字幕
         if let subtitleLayer = self.subtitleLayer {
-            let animationLayer = CALayer()
-            animationLayer.frame = self.playerView.bounds
             
+            let bounds = CGRect(origin: .zero, size: composition.naturalSize)
+            
+            let animationLayer = CALayer()
+            animationLayer.frame = bounds
+//            animationLayer.contentsScale = UIScreen.main.scale
+
             let videoPlayer = CALayer()
-            videoPlayer.frame = self.playerView.bounds
+            videoPlayer.frame = bounds
+//            animationLayer.contentsScale = UIScreen.main.scale
             
             animationLayer.addSublayer(videoPlayer)
             animationLayer.addSublayer(subtitleLayer)
@@ -228,12 +217,15 @@ class PlayerController: NSObject {
         return session
     }
     
-    private func fixedComposition(composition: AVMutableVideoComposition, orientation: AVCaptureVideoOrientation) -> AVMutableVideoComposition {
+    private func fixedComposition(_ naturalComposition: AVMutableVideoComposition,asset: AVAsset, orientation: AVCaptureVideoOrientation) -> AVMutableVideoComposition {
+        
+        let composition = naturalComposition
+        
         guard orientation != .landscapeRight else {
             return composition
         }
         
-        guard let videoTrack = self.asset.tracks(withMediaType: .video).first else {
+        guard let videoTrack = asset.tracks(withMediaType: .video).first else {
             return composition
         }
         
@@ -241,7 +233,7 @@ class PlayerController: NSObject {
         var mixedTransform: CGAffineTransform
 
         let rotateInstruction = AVMutableVideoCompositionInstruction()
-        rotateInstruction.timeRange = CMTimeRange(start: CMTime.zero, duration: self.asset.duration)
+        rotateInstruction.timeRange = CMTimeRange(start: CMTime.zero, duration: asset.duration)
         
         let rotateLayerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
         

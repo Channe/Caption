@@ -12,31 +12,29 @@ class SubtitleItem: NSObject {
     
     private(set) var text: String
     private(set) var timeRange: CMTimeRange
-    private(set) var bounds: CGRect
-    private(set) var size: CGSize
     private(set) var font: UIFont
     
-    init(text: String, timestamp:TimeInterval, duration: TimeInterval, size: CGSize, font: UIFont) {
+    init(text: String, timestamp:TimeInterval, duration: TimeInterval, font: UIFont) {
         
         self.text = text
         self.timeRange = CMTimeRange(start: CMTime(seconds: timestamp, preferredTimescale: 600),
                                      duration: CMTime(seconds: duration, preferredTimescale: 600))
-        self.size = size
-        self.bounds = CGRect(origin: .zero, size: size)
         self.font = font
         
         super.init()
         
     }
     
-    func buildLayer() -> CALayer {
-        
+    func buildLayer(frame: CGRect) -> CALayer {
+        // 需要在这里设置字幕的 frame，以便播放时和导出时字幕位置一致
+
         let parentLayer = CALayer()
-        parentLayer.frame = self.bounds
-        
+        parentLayer.frame = frame
+//        parentLayer.contentsScale = UIScreen.main.scale
+
         let textLayer = CATextLayer()
         textLayer.string = self.text
-        textLayer.frame = self.bounds
+        textLayer.frame = CGRect(origin: .zero, size: frame.size)
         textLayer.backgroundColor = UIColor.clear.cgColor
         textLayer.contentsScale = UIScreen.main.scale
         textLayer.isWrapped = true
@@ -60,8 +58,8 @@ class SubtitleItem: NSObject {
         
         // 淡入：从透明到不透明，淡出：再从不透明到透明
         animation.values = [0.0, 1.0, 1.0, 0.0]
-        // 每段动画执行的时间点，10%的时间淡入，10%的时间淡出
-        animation.keyTimes = [0.0, 0.1, 0.9, 1.0]
+        // 每段动画执行的时间点，20%的时间淡入，20%的时间淡出
+        animation.keyTimes = [0.0, 0.2, 0.8, 1.0]
         
         //TODO: qianlei animation.beginTime
         // 设置起始时间，如果要表示影片片头，不能用 0.0 来赋值 beginTime，因为 CoreAnimation 会将 0.0 的 beginTime 转为 CACurrentMediaTime()，所以要用 AVCoreAnimationBeginTimeAtZero 来代替
