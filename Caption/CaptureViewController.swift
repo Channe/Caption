@@ -269,7 +269,8 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             return
         }
         
-        let videoPlayerVC = VideoPlayerViewController(videoURL: URL(fileURLWithPath: savePath))
+        let isVideoMirrored = self.captureController?.isVideoMirrored ?? false
+        let videoPlayerVC = VideoPlayerViewController(videoURL: URL(fileURLWithPath: savePath), isVideoMirrored: isVideoMirrored)
         
         self.navigationController?.pushViewController(videoPlayerVC, animated: true)
     }

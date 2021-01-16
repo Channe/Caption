@@ -32,6 +32,7 @@ class PlayerController: NSObject {
     private var playerObserver: Any?
     
     deinit {
+        print("PlayerController" + #function)
         NotificationCenter.default.removeObserver(self)
 //        self.playerItem.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: &PlayerItemStatusContext)
         
@@ -40,9 +41,12 @@ class PlayerController: NSObject {
         }
     }
 
-    init(URL: URL, repeats: Bool = true) {
+    private(set) var isVideoMirrored = false
+    
+    init(URL: URL, repeats: Bool = true, isVideoMirrored: Bool = false) {
         self.asset = AVAsset(url: URL)
         self.repeats = repeats
+        self.isVideoMirrored = isVideoMirrored
         
         self.playerItem = AVPlayerItem(asset: self.asset, automaticallyLoadedAssetKeys: self.keys)
         self.player = AVPlayer(playerItem: self.playerItem)
@@ -260,6 +264,15 @@ class PlayerController: NSObject {
             
             composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
             rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
+        }
+        
+        if self.isVideoMirrored {
+            // 翻转镜像
+            let mirroredTransform = CGAffineTransform(scaleX: -1.0, y: 1.0).rotated(by: CGFloat(Double.pi/2))
+            rotateLayerInstruction.setTransform(mirroredTransform, at: CMTime.zero)
+            print(" 翻转镜像==========")
+        } else {
+            print("不翻转镜像==========")
         }
         
         rotateInstruction.layerInstructions = [rotateLayerInstruction]

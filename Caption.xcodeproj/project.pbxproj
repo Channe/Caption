@@ -142,8 +142,8 @@
 			children = (
 				97766D9225AAEB83003AF31D /* AppDelegate.swift */,
 				9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */,
-				9771DC2C25AF171300EA7239 /* CircleGradientView.swift */,
 				9771DBF025AE154C00EA7239 /* CaptureController.swift */,
+				9771DC2C25AF171300EA7239 /* CircleGradientView.swift */,
 				9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */,
 				9771DBDC25AC74B000EA7239 /* PlayerController.swift */,
 				9771DC8C25B28BF100EA7239 /* VideoTools.swift */,

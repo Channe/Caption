@@ -21,6 +21,8 @@ class CaptureController: NSObject {
         return session
     }()
     
+    private(set) var captureConnection: AVCaptureConnection?
+    
     private lazy var previewLayer: AVCaptureVideoPreviewLayer = {
         let layer = AVCaptureVideoPreviewLayer(session: self.captureSession)
         layer.videoGravity = .resizeAspectFill
@@ -42,7 +44,11 @@ class CaptureController: NSObject {
     var startClosure: CaptureMovieStartClosure? = nil
     var recordingClosure: CaptureMovieRecordingClosure? = nil
     var finishClosure: CaptureMovieFinishClosure? = nil
-
+    
+    var isVideoMirrored: Bool {
+        return self.captureConnection?.isVideoMirrored ?? false
+    }
+    
     init(inView view: UIView, saveToURL: URL) {
         
         self.previewView = view
@@ -94,11 +100,20 @@ class CaptureController: NSObject {
             return
         }
         
+        if device.isSmoothAutoFocusSupported {
+            do {
+                try device.lockForConfiguration()
+                device.isSmoothAutoFocusEnabled = true
+                device.unlockForConfiguration()
+            } catch {
+                print("device.lockForConfiguration error")
+            }
+        }
+        
         //应立即设置 self.movieOutput.connection，否则预览和实际拍摄的画面有差异
         guard let connection = self.movieOutput.connection(with: .video) else {
             return
         }
-        
         if connection.isVideoStabilizationSupported {
             connection.preferredVideoStabilizationMode = .auto
         }
@@ -111,14 +126,15 @@ class CaptureController: NSObject {
             print("isVideoOrientationSupported is false")
         }
         
-        if connection.isVideoMirroringSupported {
-            // 只有前置摄像头需要镜像
-            if device.position == .front {
-                connection.isVideoMirrored = true
-            } else {
-                connection.isVideoMirrored = false
-            }
+        // 只有前置摄像头需要镜像
+        if device.position == .front && connection.isVideoMirroringSupported {
+            connection.isVideoMirrored = true
+            connection.automaticallyAdjustsVideoMirroring = false
+        } else {
+            connection.isVideoMirrored = false
+            connection.automaticallyAdjustsVideoMirroring = true
         }
+        self.captureConnection = connection
         
     }
     
@@ -144,16 +160,27 @@ class CaptureController: NSObject {
         do {
             var input: AVCaptureDeviceInput!
             if activeInput.device == frontCamera {
+                // 切换到后摄像头
                 input = try AVCaptureDeviceInput(device: backCamera)
+                
+                self.captureConnection?.isVideoMirrored = false
             } else {
+                // 切换到前摄像头
                 input = try AVCaptureDeviceInput(device: frontCamera)
+                
+                let isVideoMirrored = self.captureConnection?.isVideoMirroringSupported ?? false
+                self.captureConnection?.isVideoMirrored = isVideoMirrored
+                print("isVideoMirrored:\(isVideoMirrored)")
             }
             
             self.captureSession.beginConfiguration()
+            
             self.captureSession.removeInput(activeInput)
             if self.captureSession.canAddInput(input) {
                 self.captureSession.addInput(input)
                 self.activeInput = input
+            } else {
+                self.captureSession.addInput(activeInput)
             }
             
             self.captureSession.commitConfiguration()

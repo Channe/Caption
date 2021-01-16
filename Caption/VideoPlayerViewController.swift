@@ -48,9 +48,9 @@ class VideoPlayerViewController: UIViewController {
         
         return btn
     }()
-    
-    init(videoURL: URL) {
-        self.playerController = PlayerController(URL: videoURL)
+
+    init(videoURL: URL, isVideoMirrored: Bool = false) {
+        self.playerController = PlayerController(URL: videoURL, isVideoMirrored:isVideoMirrored)
         
         // 语音转文字
         self.captionGenerator = AudioCaptionGenerator(URL: URL(fileURLWithPath: savePath))
@@ -84,7 +84,7 @@ class VideoPlayerViewController: UIViewController {
     }
     
     deinit {
-        print(#function)
+        print("VideoPlayerViewController" + #function)
     }
     
     override func viewDidLoad() {
