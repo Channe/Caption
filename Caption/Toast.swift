@@ -47,7 +47,7 @@ struct Toast {
         return label
     }()
     
-    static func showTips(_ msg:String, duration:Double = 2, execute: () -> Void) {
+    static func showTips(_ msg:String, duration:Double = 2, execute: @escaping () -> Void) {
         self.showTips(msg, duration: duration)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: execute)

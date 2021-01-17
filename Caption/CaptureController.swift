@@ -10,7 +10,7 @@ import AVFoundation
 
 typealias CaptureMovieStartClosure = () -> Void
 typealias CaptureMovieRecordingClosure = (TimeInterval) -> Void
-typealias CaptureMovieFinishClosure = (URL) -> Void
+typealias CaptureMovieFinishClosure = (URL, TimeInterval) -> Void
 
 class CaptureController: NSObject {
     
@@ -362,7 +362,7 @@ extension CaptureController: AVCaptureFileOutputRecordingDelegate {
         // 录像结束，保存到沙盒，不需要保存到系统相册
         print("didFinishRecordingTo:\(outputFileURL)")
         
-        self.finishClosure?(outputFileURL)
+        self.finishClosure?(outputFileURL, self.duration)
         
         cancelTimer()
         

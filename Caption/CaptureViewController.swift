@@ -120,10 +120,11 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             self.showProgress(duration: duration)
         }
         
-        self.captureController?.finishClosure = { [weak self] outputURL in
+        self.captureController?.finishClosure = { [weak self] outputURL, duration in
             guard let self = self else { return }
             print("finishClosure:\(outputURL)")
             self.showCancelBtn(true)
+            self.showProgress(duration: duration)
         }
         
         self.captureController?.startSession()
@@ -207,14 +208,6 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     private func showCancelBtn(_ yesOrNo: Bool) {
         self.cancelBtn.isHidden = !yesOrNo
         self.nextBtn.isHidden = !yesOrNo
-        
-        if yesOrNo {
-            let asset = AVAsset(url: URL(fileURLWithPath: savePath))
-            let duration = asset.duration.seconds
-            showProgress(duration: duration)
-        } else {
-            showProgress(duration: nil)
-        }
     }
     
     private func showProgress(duration: TimeInterval?) {
@@ -228,13 +221,15 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             return
         }
         
-        let displayDuration = round(duration)
+        let roundDuration = round(duration)
+//        let ceilDuration = ceil(duration)
+        let displayDuration = roundDuration
         self.durationLabel.text = "\(String(format: "%.0f", displayDuration))s"
 
         self.durationLabel.backgroundColor = .clear
         
         self.circelGradientView.isHidden = false
-        self.circelGradientView.progess = CGFloat(duration / videoMaxDuration)
+        self.circelGradientView.progess = CGFloat(displayDuration / videoMaxDuration)
     }
     
     //MARK: - Actions
@@ -258,6 +253,7 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         print(#function)
         
         showCancelBtn(false)
+        showProgress(duration: nil)
         
         do {
             try FileManager.default.removeItem(atPath: savePath)
@@ -378,6 +374,8 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
                 case .completed:
                     print("export video completed")
                     self.showCancelBtn(true)
+                    let asset = AVAsset(url: URL(fileURLWithPath: savePath))
+                    self.showProgress(duration: asset.duration.seconds)
                 case .failed:
                     print(session.error as Any)
                     Toast.showTips(session.error!.localizedDescription)
