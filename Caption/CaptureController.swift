@@ -105,6 +105,9 @@ class CaptureController: NSObject {
         
         requestAccess()
         
+        // 修复10s+视频无声音
+        self.movieOutput.movieFragmentInterval = CMTime.invalid
+        
         // 默认是前置摄像头
         let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
         
