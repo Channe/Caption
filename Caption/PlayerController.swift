@@ -94,9 +94,10 @@ class PlayerController: NSObject {
         let playerSize = self.playerView.bounds.size
         
         // 预览时，字幕宽高使用显示控件的宽高；
-        
         self.subtitleItems.forEach { (subtitleItem) in
-            let subtitleLayer = subtitleItem.displayLayer(textX: subtitleItem.textX, textY: subtitleItem.textY, superWidth: playerSize.width, superHeight: playerSize.height)
+            let subtitleLayer = subtitleItem
+                .getDisplayLayer(displayWidth: playerSize.width,
+                                 displayHeight: playerSize.height)
             
             let syncLayer = AVSynchronizedLayer(playerItem: self.playerItem)
             syncLayer.addSublayer(subtitleLayer)
@@ -191,27 +192,29 @@ class PlayerController: NSObject {
 
         // 导出时加上字幕
         if self.subtitleItems.count > 0 {
+            // 使用旋转之后的宽高
+            let renderSize = videoComposition.renderSize
+            let bounds = CGRect(origin: .zero, size: renderSize)
             
-            let bounds = CGRect(origin: .zero, size: composition.naturalSize)
-            let naturalSize = composition.naturalSize
+            let parentLayer = CALayer()
+            parentLayer.frame = bounds // 必须和视频尺寸相同
             
-            let animationLayer = CALayer()
-            animationLayer.frame = bounds
+            let overlayLayer = CALayer()
+            overlayLayer.frame = bounds // 必须和视频尺寸相同
             
-            let videoPlayer = CALayer()
-            videoPlayer.frame = bounds
-            
-            animationLayer.addSublayer(videoPlayer)
-            animationLayer.isGeometryFlipped = true // 避免错位现象
+            parentLayer.addSublayer(overlayLayer)
+            parentLayer.isGeometryFlipped = true // 避免错位现象
 
             // 处理多段字幕
             self.subtitleItems.forEach { (subtitleItem) in
-                
-                let subtitleLayer = subtitleItem.exportLayer(superWidth: naturalSize.width, superHeight: naturalSize.height)
-                animationLayer.addSublayer(subtitleLayer)
+                let subtitleLayer = subtitleItem
+                    .getExportLayer(videoWidth: renderSize.width,
+                                    videoHeight: renderSize.height)
+                parentLayer.addSublayer(subtitleLayer)
             }
             
-            let animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: videoPlayer, in: animationLayer)
+            // 将合成的视频帧放在videoLayer中并渲染animationLayer以生成最终帧
+            let animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: overlayLayer, in: parentLayer)
             
             videoComposition.animationTool = animationTool
             
