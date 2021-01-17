@@ -157,9 +157,10 @@ class VideoPlayerViewController: UIViewController {
         }
 
         Toast.showTips("exporting...")
+        Toast.showLoading()
         
         self.playerController.exportVideo(URL: outputURL) { (result) in
-
+            Toast.hideLoading()
             switch result {
             
             case .success(_):

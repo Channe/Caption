@@ -36,6 +36,8 @@
 	<string>Save Video</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Save Video</string>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
