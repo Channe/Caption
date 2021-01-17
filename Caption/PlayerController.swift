@@ -185,8 +185,9 @@ class PlayerController: NSObject {
             session.outputFileType = session.supportedFileTypes.first!
         }
         
-        let naturalVideoComposition = AVMutableVideoComposition(propertiesOf: composition)
-        let videoComposition = VideoTools.fixedComposition(naturalVideoComposition, asset: self.asset, orientation: self.asset.videoOrientation, isVideoMirrored: self.isVideoMirrored)
+        let videoComposition = VideoTools.fixed(composition: composition,
+                                                assetOrientation: self.asset.videoOrientation,
+                                                isVideoMirrored: self.isVideoMirrored)
         if videoComposition.renderSize.width > 0 {
             session.videoComposition = videoComposition
         }

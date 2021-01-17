@@ -325,6 +325,8 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
     
     private func saveVideoToSandbox(url videoURL: URL) {
         
+        Toast.showLoading()
+        
         if FileManager.default.fileExists(atPath: savePath) {
             do {
                 try FileManager.default.removeItem(atPath: savePath)
@@ -336,20 +338,29 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         let asset = AVAsset(url: videoURL)
         guard asset.isExportable else {
             print("cannot export,asset")
+            Toast.hideLoading()
             return
         }
 
         guard let composition = VideoTools.buildComposition(asset: asset) else {
             print("cannot export,composition")
+            Toast.hideLoading()
             return
         }
-
         let presetName = AVAssetExportPresetHighestQuality
 
         guard let session = AVAssetExportSession(asset: composition, presetName: presetName) else {
             print("AVAssetExportSession error")
+            Toast.hideLoading()
             return
         }
+        
+        let videoComposition = VideoTools.fixed(composition: composition,
+                                                assetOrientation: asset.videoOrientation)
+        if videoComposition.renderSize.width > 0 {
+            session.videoComposition = videoComposition
+        }
+        
         session.shouldOptimizeForNetworkUse = true
 
         if session.supportedFileTypes.contains(.mp4) {
@@ -361,6 +372,8 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
         session.outputURL = URL(fileURLWithPath: savePath)
 
         session.exportAsynchronously {
+            Toast.hideLoading()
+            
             DispatchQueue.main.async {
                 print("export video...: \(savePath)")
                 let status = session.status

@@ -40,48 +40,48 @@ class VideoTools {
         return composition
     }
     
-    static func fixedComposition(_ naturalComposition: AVMutableVideoComposition,asset: AVAsset, orientation: AVCaptureVideoOrientation, isVideoMirrored:Bool) -> AVMutableVideoComposition {
+    static func fixed(composition: AVMutableComposition, assetOrientation: AVCaptureVideoOrientation, isVideoMirrored:Bool = false) -> AVMutableVideoComposition {
         
-        let composition = naturalComposition
+        let videoComposition = AVMutableVideoComposition(propertiesOf: composition)
         
-        guard orientation != .landscapeRight else {
-            return composition
+        guard assetOrientation != .landscapeRight else {
+            return videoComposition
         }
         
-        guard let videoTrack = asset.tracks(withMediaType: .video).first else {
-            return composition
+        guard let videoTrack = composition.tracks(withMediaType: .video).first else {
+            return videoComposition
         }
         
         var translateToCenter: CGAffineTransform
         var mixedTransform: CGAffineTransform
         
         let rotateInstruction = AVMutableVideoCompositionInstruction()
-        rotateInstruction.timeRange = CMTimeRange(start: CMTime.zero, duration: asset.duration)
+        rotateInstruction.timeRange = CMTimeRange(start: CMTime.zero, duration: composition.duration)
         
         let rotateLayerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
         
         let naturalSize = videoTrack.naturalSize
         
-        if orientation == .portrait {
+        if assetOrientation == .portrait {
             // 顺时针旋转90°
             translateToCenter = CGAffineTransform(translationX: naturalSize.height, y: 0.0)
             mixedTransform = translateToCenter.rotated(by: CGFloat(Double.pi / 2))
             
-            composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
+            videoComposition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
             rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
-        } else if orientation == .landscapeLeft {
+        } else if assetOrientation == .landscapeLeft {
             // 顺时针旋转180°
             translateToCenter = CGAffineTransform(translationX: naturalSize.width, y: naturalSize.height)
             mixedTransform = translateToCenter.rotated(by: CGFloat(Double.pi))
             
-            composition.renderSize = CGSize(width: naturalSize.width, height: naturalSize.height)
+            videoComposition.renderSize = CGSize(width: naturalSize.width, height: naturalSize.height)
             rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
-        } else if orientation == .portraitUpsideDown {
+        } else if assetOrientation == .portraitUpsideDown {
             // 顺时针旋转270°
             translateToCenter = CGAffineTransform(translationX: 0.0, y: naturalSize.width)
             mixedTransform = translateToCenter.rotated(by: CGFloat((Double.pi / 2) * 3.0))
             
-            composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
+            videoComposition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
             rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
         }
         
@@ -95,9 +95,9 @@ class VideoTools {
         }
         
         rotateInstruction.layerInstructions = [rotateLayerInstruction]
-        composition.instructions = [rotateInstruction]
+        videoComposition.instructions = [rotateInstruction]
         
-        return composition
+        return videoComposition
     }
     
 }
