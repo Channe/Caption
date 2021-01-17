@@ -64,23 +64,24 @@ class VideoPlayerViewController: UIViewController {
             self.failedRetryBtn.isHidden = true
         }
         
-        self.captionGenerator.finishClosure = { [weak self] success in
+        self.captionGenerator.finishClosure = { [weak self] segments in
             guard let self = self else { return }
-            
+                        
             self.captioningView.isHidden = true
-            self.failedRetryBtn.isHidden = success
+            self.failedRetryBtn.isHidden = segments != nil
             
-            if success {
-                let text = self.captionGenerator.finalText
-                // 显示字幕
-                print("finalText:\(text)")
+            // 显示字幕
+            let naturalTimeScale = self.playerController.naturalTimeScale
+            if let segments = segments,
+               let items = SubtitleItem.subtitles(of: segments, naturalTimeScale: naturalTimeScale) {
                 
-                //TODO: qianlei 字幕时间
                 let font = TTFontB(26)
-                let subtitleItem1 = SubtitleItem(text: text, timestamp: 1, duration: 5, font: font)
-                let subtitleItem2 = SubtitleItem(text: "第二段字幕 test", timestamp: 6, duration: 5, font: font)
-
-                self.playerController.displaySubtitles([subtitleItem1, subtitleItem2])
+                let origin = CGPoint(x: 20, y: 360)
+                let array = items.map { (item) -> SubtitleItem in
+                    item.config(font: font, origin:origin)
+                    return item
+                }
+                self.playerController.displaySubtitles(array)
             }
         }
     }

@@ -7,32 +7,58 @@
 
 import UIKit
 import AVFoundation
+import Speech
 
 class SubtitleItem: NSObject {
     
     private(set) var text: String
     private(set) var timeRange: CMTimeRange
-    private(set) var font: UIFont
+    private(set) var font: UIFont = TTFontB(26)
     
-    private(set) var textX: CGFloat
-    private(set) var textY: CGFloat
+    private(set) var textX: CGFloat = 20
+    private(set) var textY: CGFloat = 360
     
     // 仔细设置字幕的 frame，以便播放时和导出时字幕位置一致
     private(set) var textXRate: CGFloat? = nil
     private(set) var textYRate: CGFloat? = nil
     
-    init(text: String, timestamp:TimeInterval, duration: TimeInterval, font: UIFont, textX: CGFloat = 20, textY: CGFloat = 360) {
+    static func subtitles(of segments: [SFTranscriptionSegment]?, naturalTimeScale: CMTimeScale) -> [SubtitleItem]? {
+        guard let segments = segments else {
+            return nil
+        }
+        // 每5个单词组成一句字幕
+        let segmentsArray = segments.chunked(into: 5)
+        
+        var subtitleItems: [SubtitleItem]? = nil
+        
+        segmentsArray.forEach { (segs) in
+            let text = segs.reduce("") { $0 + " " + $1.substring }
+            let timestamp = segs.first!.timestamp
+            // 避免字幕粘连
+//            let duration = segs.last!.timestamp + segs.last!.duration - 0.2
+            let duration = segs.last!.timestamp + segs.last!.duration
+            
+            if subtitleItems == nil {
+                subtitleItems = []
+            }
+            subtitleItems?.append(SubtitleItem(text: text, timestamp: timestamp, duration: duration, naturalTimeScale:naturalTimeScale))
+        }
+        
+        return subtitleItems
+    }
+    
+    init(text: String, timestamp:TimeInterval, duration: TimeInterval, naturalTimeScale: CMTimeScale) {
         
         self.text = text
-        self.timeRange = CMTimeRange(start: CMTime(seconds: timestamp, preferredTimescale: 600),
-                                     duration: CMTime(seconds: duration, preferredTimescale: 600))
-        self.font = font
-        
-        self.textX = textX
-        self.textY = textY
-        
+        self.timeRange = CMTimeRange(start: CMTime(seconds: timestamp, preferredTimescale: naturalTimeScale),
+                                     duration: CMTime(seconds: duration, preferredTimescale: naturalTimeScale))
         super.init()
-        
+    }
+    
+    func config(font: UIFont, origin: CGPoint) {
+        self.font = font
+        self.textX = origin.x
+        self.textY = origin.y
     }
     
     private(set) var textWHRate: CGFloat? = nil
@@ -65,6 +91,7 @@ class SubtitleItem: NSObject {
         print(#function)
         
         let textX = videoWidth * self.textXRate!
+        //TODO: qianlei 稍微有点偏下
         let textY = videoHeight * self.textYRate!
         let textWidth = videoWidth - textX * 2
         let textHeight = textWidth / self.textWHRate!
@@ -91,7 +118,7 @@ class SubtitleItem: NSObject {
         textLayer.string = self.text
         textLayer.frame = CGRect(origin: .zero, size: textFrame.size)
         print("textLayer.frame:\(textLayer.frame)")
-        textLayer.backgroundColor = UIColor.lightGray.cgColor
+        textLayer.backgroundColor = TTBlackColor(0.35).cgColor
         textLayer.contentsScale = UIScreen.main.scale
         textLayer.isWrapped = true
         textLayer.alignmentMode = .left
@@ -106,14 +133,17 @@ class SubtitleItem: NSObject {
         
         // 淡入：从透明到不透明，淡出：再从不透明到透明
         animation.values = [0.0, 1.0, 1.0, 0.0]
-        // 每段动画执行的时间点，20%的时间淡入，20%的时间淡出
-        animation.keyTimes = [0.0, 0.2, 0.8, 1.0]
+        // 每段动画执行的时间点，3%的时间淡入，3%的时间淡出
+        animation.keyTimes = [0.0, 0.03, 0.97, 1.0]
         
-        //TODO: qianlei animation.beginTime
         // 设置起始时间，如果要表示影片片头，不能用 0.0 来赋值 beginTime，因为 CoreAnimation 会将 0.0 的 beginTime 转为 CACurrentMediaTime()，所以要用 AVCoreAnimationBeginTimeAtZero 来代替
-        animation.beginTime = CMTimeGetSeconds(self.timeRange.start)
-        
+        var start = CMTimeGetSeconds(self.timeRange.start)
+        if start == 0.0 {
+            start = AVCoreAnimationBeginTimeAtZero
+        }
+        animation.beginTime = start
         animation.duration = CMTimeGetSeconds(self.timeRange.duration)
+        print("animation.beginTime:\(animation.beginTime), animation.duration:\(animation.duration)")
         
         animation.isRemovedOnCompletion = false
         
@@ -122,4 +152,15 @@ class SubtitleItem: NSObject {
         return parentLayer
     }
     
+}
+
+//let numbers = Array(1...12)
+//let result = numbers.chunked(into: 5)
+//print(result) // [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12]]
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
+    }
 }

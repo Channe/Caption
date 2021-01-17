@@ -9,7 +9,7 @@ import Foundation
 import Speech
 
 typealias CapturenGeneratorStartClosure = () -> Void
-typealias CapturenGeneratorFinishClosure = (Bool) -> Void
+typealias CapturenGeneratorFinishClosure = ([SFTranscriptionSegment]?) -> Void
 
 class AudioCaptionGenerator: NSObject {
     
@@ -140,7 +140,7 @@ class AudioCaptionGenerator: NSObject {
         
 //        recognitionRequest.shouldReportPartialResults = true
         
-        // 在线语音识别效果比离线更好
+        // 在线语音识别效果不一定比离线更好
 //        if #available(iOS 13, *) {
 //            recognitionRequest.requiresOnDeviceRecognition = true
 //        }
@@ -172,7 +172,42 @@ class AudioCaptionGenerator: NSObject {
                     self.recognitionFileRequest = nil
                     self.recognitionTask = nil
                     
-                    self.finishClosure?(self.finalResult != nil)
+                    //TODO: qianlei 切分句子
+                    if let final = self.finalResult {
+//                        let averagePauseDuration = final.averagePauseDuration
+//                        let segments = final.segments
+//
+//                        var pauseIndexs: [Array<Any>.Index]? = nil
+//                        segments.forEach { (seg) in
+//                            let index = final.segments.firstIndex(of: seg)!
+//                            if index != 0 {
+//                                let prevIndex = index - 1
+//                                let prevSeg = segments[prevIndex]
+//                                let prevEndTimestamp = prevSeg.timestamp + prevSeg.duration
+//                                let pauseDuration = seg.timestamp - prevEndTimestamp
+//                                // 如果当前单词和前一个单词的间隔大于平均间隔，那么前一个单词之后应该分句
+//                                if pauseDuration > averagePauseDuration {
+//                                    if pauseIndexs == nil {
+//                                        pauseIndexs = []
+//                                    }
+//                                    pauseIndexs?.append(prevIndex)
+//                                }
+//                            }
+//                        }
+//                        // [ 3, 7, 12]
+//                        var subSegments: [SFTranscriptionSegment]? = nil
+//                        pauseIndexs?.forEach({ (separtor) in
+//                            if subSegments == nil {
+//                                subSegments = []
+//                            }
+//                            let index = pauseIndexs!.firstIndex(of: separtor)!
+//
+//                        })
+                        
+                        self.finishClosure?(final.segments)
+                    } else {
+                        self.finishClosure?(nil)
+                    }
                 }
             }
             

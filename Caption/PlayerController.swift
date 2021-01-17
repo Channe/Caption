@@ -23,6 +23,10 @@ class PlayerController: NSObject {
 
     private var asset: AVAsset
     
+    var naturalTimeScale: CMTimeScale {
+        return self.asset.tracks(withMediaType: .video).first?.naturalTimeScale ?? 600
+    }
+    
     private(set) var playerItem: AVPlayerItem
     private var player: AVPlayer
     private(set) var playerView: PlayerView
