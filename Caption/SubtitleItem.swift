@@ -30,6 +30,9 @@ class SubtitleItem: NSObject {
         var subtitleItems: [SubtitleItem]? = nil
         
         segmentsArray.forEach { (segs) in
+            guard segs.count > 0 else {
+                return
+            }
             let text = segs.reduce("") { $0 + $1.substring + " " }
             let startTimestamp = segs.first!.timestamp
             let endTimestamp = segs.last!.timestamp + segs.last!.duration
