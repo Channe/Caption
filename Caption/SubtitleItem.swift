@@ -23,6 +23,27 @@ class SubtitleItem: NSObject {
     private(set) var textXRate: CGFloat? = nil
     private(set) var textYRate: CGFloat? = nil
     
+    static func subtitles(segmentsArray: [[SFTranscriptionSegment]]?, naturalTimeScale: CMTimeScale) -> [SubtitleItem]? {
+        guard let segmentsArray = segmentsArray else {
+            return nil
+        }
+        var subtitleItems: [SubtitleItem]? = nil
+        
+        segmentsArray.forEach { (segs) in
+            let text = segs.reduce("") { $0 + $1.substring + " " }
+            let startTimestamp = segs.first!.timestamp
+            let endTimestamp = segs.last!.timestamp + segs.last!.duration
+            let duration = endTimestamp - startTimestamp
+            
+            if subtitleItems == nil {
+                subtitleItems = []
+            }
+            subtitleItems?.append(SubtitleItem(text: text, timestamp: startTimestamp, duration: duration, naturalTimeScale:naturalTimeScale))
+        }
+        
+        return subtitleItems
+    }
+    
     static func subtitles(of segments: [SFTranscriptionSegment]?, naturalTimeScale: CMTimeScale) -> [SubtitleItem]? {
         guard let segments = segments else {
             return nil

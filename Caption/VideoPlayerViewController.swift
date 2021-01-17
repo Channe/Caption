@@ -64,17 +64,19 @@ class VideoPlayerViewController: UIViewController {
             self.failedRetryBtn.isHidden = true
         }
         
-        self.captionGenerator.finishClosure = { [weak self] segments in
+        self.captionGenerator.finishClosure = { [weak self] segmentsArray in
             guard let self = self else { return }
                         
             self.captioningView.isHidden = true
-            self.failedRetryBtn.isHidden = segments != nil
+            self.failedRetryBtn.isHidden = segmentsArray != nil
             
             // 显示字幕
             let naturalTimeScale = self.playerController.naturalTimeScale
-            if let segments = segments,
-               let items = SubtitleItem.subtitles(of: segments, naturalTimeScale: naturalTimeScale) {
-                
+            if let segmentsArray = segmentsArray,
+//               if let segments = segments,
+//               let items = SubtitleItem.subtitles(of: segments, naturalTimeScale: naturalTimeScale) {
+               let items = SubtitleItem.subtitles(segmentsArray: segmentsArray, naturalTimeScale: naturalTimeScale) {
+
                 let font = TTFontB(26)
                 let origin = CGPoint(x: 20, y: 360)
                 let array = items.map { (item) -> SubtitleItem in

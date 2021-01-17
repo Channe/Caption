@@ -9,7 +9,7 @@ import Foundation
 import Speech
 
 typealias CapturenGeneratorStartClosure = () -> Void
-typealias CapturenGeneratorFinishClosure = ([SFTranscriptionSegment]?) -> Void
+typealias CapturenGeneratorFinishClosure = ([[SFTranscriptionSegment]]?) -> Void
 
 class AudioCaptionGenerator: NSObject {
     
@@ -172,39 +172,59 @@ class AudioCaptionGenerator: NSObject {
                     self.recognitionFileRequest = nil
                     self.recognitionTask = nil
                     
-                    //TODO: qianlei 切分句子
+                    // 切分句子
                     if let final = self.finalResult {
-//                        let averagePauseDuration = final.averagePauseDuration
-//                        let segments = final.segments
-//
-//                        var pauseIndexs: [Array<Any>.Index]? = nil
-//                        segments.forEach { (seg) in
-//                            let index = final.segments.firstIndex(of: seg)!
-//                            if index != 0 {
-//                                let prevIndex = index - 1
-//                                let prevSeg = segments[prevIndex]
-//                                let prevEndTimestamp = prevSeg.timestamp + prevSeg.duration
-//                                let pauseDuration = seg.timestamp - prevEndTimestamp
-//                                // 如果当前单词和前一个单词的间隔大于平均间隔，那么前一个单词之后应该分句
-//                                if pauseDuration > averagePauseDuration {
-//                                    if pauseIndexs == nil {
-//                                        pauseIndexs = []
-//                                    }
-//                                    pauseIndexs?.append(prevIndex)
-//                                }
-//                            }
-//                        }
-//                        // [ 3, 7, 12]
-//                        var subSegments: [SFTranscriptionSegment]? = nil
-//                        pauseIndexs?.forEach({ (separtor) in
-//                            if subSegments == nil {
-//                                subSegments = []
-//                            }
-//                            let index = pauseIndexs!.firstIndex(of: separtor)!
-//
-//                        })
                         
-                        self.finishClosure?(final.segments)
+                        let averagePauseDuration = final.averagePauseDuration
+                        let segments = final.segments
+
+                        var pauseIndexes: [Array<Any>.Index]? = nil
+                        segments.forEach { (seg) in
+                            let index = segments.firstIndex(of: seg)!
+                            if index != 0 {
+                                let prevIndex = index - 1
+                                let prevSeg = segments[prevIndex]
+                                let prevEndTimestamp = prevSeg.timestamp + prevSeg.duration
+                                let pauseDuration = seg.timestamp - prevEndTimestamp
+                                // 如果当前单词和前一个单词的间隔大于平均间隔，那么前一个单词之后应该分句
+                                if pauseDuration > averagePauseDuration {
+                                    if pauseIndexes == nil {
+                                        pauseIndexes = []
+                                    }
+                                    pauseIndexes?.append(prevIndex)
+                                }
+                            }
+                        }
+                        
+                        guard let separtorIndexes = pauseIndexes else {
+                            self.finishClosure?([segments])
+                            return
+                        }
+                        
+                        // [ 1, 3, 5, 7]
+                        var subSegmentsArray = [[SFTranscriptionSegment]]()
+                        for _ in 0...separtorIndexes.count {
+                            subSegmentsArray.append([SFTranscriptionSegment]())
+                        }
+                        separtorIndexes.forEach({ (separtor) in
+                            let index = separtorIndexes.firstIndex(of: separtor)!
+                            if index == separtorIndexes.count - 1 {
+                                let prevSpartor = separtorIndexes[index - 1]
+                                let subSegments = Array(segments[prevSpartor+1...separtor])
+                                subSegmentsArray[index] = subSegments
+                                let subSegmentsLast = Array(segments[separtor+1..<segments.count])
+                                subSegmentsArray[index+1] = subSegmentsLast
+                            } else if index == 0 {
+                                let subSegments = Array(segments[0...separtor])
+                                subSegmentsArray[index] = subSegments
+                            } else {
+                                let prevSpartor = separtorIndexes[index - 1]
+                                let subSegments = Array(segments[prevSpartor+1...separtor])
+                                subSegmentsArray[index] = subSegments
+                            }
+                        })
+                        
+                        self.finishClosure?(subSegmentsArray)
                     } else {
                         self.finishClosure?(nil)
                     }
@@ -214,11 +234,5 @@ class AudioCaptionGenerator: NSObject {
         })
         
     }
-    
-}
-
-extension AudioCaptionGenerator: SFSpeechRecognitionTaskDelegate {
-    
-    
     
 }
