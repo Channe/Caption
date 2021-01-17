@@ -13,6 +13,7 @@ class SubtitleItem: NSObject {
     
     private(set) var text: String
     private(set) var timeRange: CMTimeRange
+
     private(set) var font: UIFont = TTFontB(26)
     
     private(set) var textX: CGFloat = 20
@@ -26,22 +27,21 @@ class SubtitleItem: NSObject {
         guard let segments = segments else {
             return nil
         }
-        // 每5个单词组成一句字幕
-        let segmentsArray = segments.chunked(into: 5)
+        // 指定个数单词组成一句字幕
+        let segmentsArray = segments.chunked(into: 6)
         
         var subtitleItems: [SubtitleItem]? = nil
         
         segmentsArray.forEach { (segs) in
             let text = segs.reduce("") { $0 + " " + $1.substring }
-            let timestamp = segs.first!.timestamp
-            // 避免字幕粘连
-//            let duration = segs.last!.timestamp + segs.last!.duration - 0.2
-            let duration = segs.last!.timestamp + segs.last!.duration
+            let startTimestamp = segs.first!.timestamp
+            let endTimestamp = segs.last!.timestamp + segs.last!.duration
+            let duration = endTimestamp - startTimestamp
             
             if subtitleItems == nil {
                 subtitleItems = []
             }
-            subtitleItems?.append(SubtitleItem(text: text, timestamp: timestamp, duration: duration, naturalTimeScale:naturalTimeScale))
+            subtitleItems?.append(SubtitleItem(text: text, timestamp: startTimestamp, duration: duration, naturalTimeScale:naturalTimeScale))
         }
         
         return subtitleItems
@@ -133,8 +133,8 @@ class SubtitleItem: NSObject {
         
         // 淡入：从透明到不透明，淡出：再从不透明到透明
         animation.values = [0.0, 1.0, 1.0, 0.0]
-        // 每段动画执行的时间点，3%的时间淡入，3%的时间淡出
-        animation.keyTimes = [0.0, 0.03, 0.97, 1.0]
+        // 每段动画执行的时间点，10%的时间淡入，10%的时间淡出
+        animation.keyTimes = [0.0, 0.1, 0.9, 1.0]
         
         // 设置起始时间，如果要表示影片片头，不能用 0.0 来赋值 beginTime，因为 CoreAnimation 会将 0.0 的 beginTime 转为 CACurrentMediaTime()，所以要用 AVCoreAnimationBeginTimeAtZero 来代替
         var start = CMTimeGetSeconds(self.timeRange.start)
@@ -147,7 +147,7 @@ class SubtitleItem: NSObject {
         
         animation.isRemovedOnCompletion = false
         
-        parentLayer.add(animation, forKey: nil)
+        parentLayer.add(animation, forKey: "opacity")
         
         return parentLayer
     }
