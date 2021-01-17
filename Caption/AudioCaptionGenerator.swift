@@ -201,7 +201,7 @@ class AudioCaptionGenerator: NSObject {
                             return
                         }
                         
-                        // [ 1, 3, 5, 7]
+                        // 按照语气停顿处 index 开始断句
                         var subSegmentsArray = [[SFTranscriptionSegment]]()
                         for _ in 0...separtorIndexes.count {
                             subSegmentsArray.append([SFTranscriptionSegment]())
@@ -209,11 +209,17 @@ class AudioCaptionGenerator: NSObject {
                         separtorIndexes.forEach({ (separtor) in
                             let index = separtorIndexes.firstIndex(of: separtor)!
                             if index == separtorIndexes.count - 1 {
-                                let prevSpartor = separtorIndexes[index - 1]
-                                let subSegments = Array(segments[prevSpartor+1...separtor])
-                                subSegmentsArray[index] = subSegments
-                                let subSegmentsLast = Array(segments[separtor+1..<segments.count])
-                                subSegmentsArray[index+1] = subSegmentsLast
+                                if separtorIndexes.count == 1 {
+                                    subSegmentsArray[index] = Array(segments[...separtor])
+                                    let subSegmentsLast = Array(segments[separtor+1..<segments.count])
+                                    subSegmentsArray[index+1] = subSegmentsLast
+                                } else {
+                                    let prevSpartor = separtorIndexes[index - 1]
+                                    let subSegments = Array(segments[prevSpartor+1...separtor])
+                                    subSegmentsArray[index] = subSegments
+                                    let subSegmentsLast = Array(segments[separtor+1..<segments.count])
+                                    subSegmentsArray[index+1] = subSegmentsLast
+                                }
                             } else if index == 0 {
                                 let subSegments = Array(segments[0...separtor])
                                 subSegmentsArray[index] = subSegments

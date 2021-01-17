@@ -38,7 +38,6 @@ class PlayerController: NSObject {
     deinit {
         print("PlayerController" + #function)
         NotificationCenter.default.removeObserver(self)
-//        self.playerItem.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: &PlayerItemStatusContext)
         
         if let observer = self.playerObserver {
             self.player.removeTimeObserver(observer)
@@ -72,7 +71,7 @@ class PlayerController: NSObject {
             NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: nil, queue: .main) { [weak self](note) in
                 guard let self = self else { return }
                 
-                self.player.seek(to: CMTime(seconds: 0, preferredTimescale: 600))
+                self.player.seek(to: CMTime.zero)
                 self.player.play()
             }
         }
@@ -167,8 +166,6 @@ class PlayerController: NSObject {
     
     private func buildExportSession(_ composition: AVMutableComposition) -> AVAssetExportSession? {
         
-        // 不管输入的视频尺寸是多少，转换的视频统一尺寸为 1080p ?
-//        let presetName = AVAssetExportPreset1920x1080
         let presetName = AVAssetExportPresetHighestQuality
         
         let presets = AVAssetExportSession.exportPresets(compatibleWith: composition)
@@ -189,7 +186,7 @@ class PlayerController: NSObject {
         }
         
         let naturalVideoComposition = AVMutableVideoComposition(propertiesOf: composition)
-        let videoComposition = fixedComposition(naturalVideoComposition, asset: self.asset, orientation: self.asset.videoOrientation)
+        let videoComposition = VideoTools.fixedComposition(naturalVideoComposition, asset: self.asset, orientation: self.asset.videoOrientation, isVideoMirrored: self.isVideoMirrored)
         if videoComposition.renderSize.width > 0 {
             session.videoComposition = videoComposition
         }
@@ -227,67 +224,6 @@ class PlayerController: NSObject {
         
         return session
     }
-    
-    private func fixedComposition(_ naturalComposition: AVMutableVideoComposition,asset: AVAsset, orientation: AVCaptureVideoOrientation) -> AVMutableVideoComposition {
-        
-        let composition = naturalComposition
-        
-        guard orientation != .landscapeRight else {
-            return composition
-        }
-        
-        guard let videoTrack = asset.tracks(withMediaType: .video).first else {
-            return composition
-        }
-        
-        var translateToCenter: CGAffineTransform
-        var mixedTransform: CGAffineTransform
-
-        let rotateInstruction = AVMutableVideoCompositionInstruction()
-        rotateInstruction.timeRange = CMTimeRange(start: CMTime.zero, duration: asset.duration)
-        
-        let rotateLayerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
-        
-        let naturalSize = videoTrack.naturalSize
-        
-        if orientation == .portrait {
-            // 顺时针旋转90°
-            translateToCenter = CGAffineTransform(translationX: naturalSize.height, y: 0.0)
-            mixedTransform = translateToCenter.rotated(by: CGFloat(Double.pi / 2))
-            
-            composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
-            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
-        } else if orientation == .landscapeLeft {
-            // 顺时针旋转180°
-            translateToCenter = CGAffineTransform(translationX: naturalSize.width, y: naturalSize.height)
-            mixedTransform = translateToCenter.rotated(by: CGFloat(Double.pi))
-            
-            composition.renderSize = CGSize(width: naturalSize.width, height: naturalSize.height)
-            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
-        } else if orientation == .portraitUpsideDown {
-            // 顺时针旋转270°
-            translateToCenter = CGAffineTransform(translationX: 0.0, y: naturalSize.width)
-            mixedTransform = translateToCenter.rotated(by: CGFloat((Double.pi / 2) * 3.0))
-            
-            composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
-            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
-        }
-        
-        if self.isVideoMirrored {
-            // 翻转镜像
-            let mirroredTransform = CGAffineTransform(scaleX: -1.0, y: 1.0).rotated(by: CGFloat(Double.pi/2))
-            rotateLayerInstruction.setTransform(mirroredTransform, at: CMTime.zero)
-            print(" 翻转镜像==========")
-        } else {
-            print("不翻转镜像==========")
-        }
-        
-        rotateInstruction.layerInstructions = [rotateLayerInstruction]
-        composition.instructions = [rotateInstruction]
-        
-        return composition
-    }
-    
     
     //MARK: - KVO
     private var PlayerItemStatusContext = 0

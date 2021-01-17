@@ -40,4 +40,88 @@ class VideoTools {
         return composition
     }
     
+    static func fixedComposition(_ naturalComposition: AVMutableVideoComposition,asset: AVAsset, orientation: AVCaptureVideoOrientation, isVideoMirrored:Bool) -> AVMutableVideoComposition {
+        
+        let composition = naturalComposition
+        
+        guard orientation != .landscapeRight else {
+            return composition
+        }
+        
+        guard let videoTrack = asset.tracks(withMediaType: .video).first else {
+            return composition
+        }
+        
+        var translateToCenter: CGAffineTransform
+        var mixedTransform: CGAffineTransform
+        
+        let rotateInstruction = AVMutableVideoCompositionInstruction()
+        rotateInstruction.timeRange = CMTimeRange(start: CMTime.zero, duration: asset.duration)
+        
+        let rotateLayerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
+        
+        let naturalSize = videoTrack.naturalSize
+        
+        if orientation == .portrait {
+            // 顺时针旋转90°
+            translateToCenter = CGAffineTransform(translationX: naturalSize.height, y: 0.0)
+            mixedTransform = translateToCenter.rotated(by: CGFloat(Double.pi / 2))
+            
+            composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
+            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
+        } else if orientation == .landscapeLeft {
+            // 顺时针旋转180°
+            translateToCenter = CGAffineTransform(translationX: naturalSize.width, y: naturalSize.height)
+            mixedTransform = translateToCenter.rotated(by: CGFloat(Double.pi))
+            
+            composition.renderSize = CGSize(width: naturalSize.width, height: naturalSize.height)
+            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
+        } else if orientation == .portraitUpsideDown {
+            // 顺时针旋转270°
+            translateToCenter = CGAffineTransform(translationX: 0.0, y: naturalSize.width)
+            mixedTransform = translateToCenter.rotated(by: CGFloat((Double.pi / 2) * 3.0))
+            
+            composition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
+            rotateLayerInstruction.setTransform(mixedTransform, at: CMTime.zero)
+        }
+        
+        if isVideoMirrored {
+            // 翻转镜像
+            let mirroredTransform = CGAffineTransform(scaleX: -1.0, y: 1.0).rotated(by: CGFloat(Double.pi/2))
+            rotateLayerInstruction.setTransform(mirroredTransform, at: CMTime.zero)
+            print(" 翻转镜像==========")
+        } else {
+            print("不翻转镜像==========")
+        }
+        
+        rotateInstruction.layerInstructions = [rotateLayerInstruction]
+        composition.instructions = [rotateInstruction]
+        
+        return composition
+    }
+    
+}
+
+extension AVAsset {
+    
+    var videoOrientation: AVCaptureVideoOrientation {
+        guard let videoTrack = self.tracks(withMediaType: .video).first else {
+            return .landscapeRight
+        }
+        
+        let t = videoTrack.preferredTransform
+        
+        if (t.a == 0 && t.b == 1.0 && t.c == -1.0 && t.d == 0) || (t.a == 0 && t.b == 1.0 && t.c == 1.0 && t.d == 0) {
+            return .portrait // 90
+        } else if (t.a == 0 && t.b == -1.0 && t.c == 1.0 && t.d == 0) || (t.a == 0 && t.b == -1.0 && t.c == -1.0 && t.d == 0) {
+            return .portraitUpsideDown // 270
+        } else if t.a == 1.0 && t.b == 0 && t.c == 0 && t.d == 1.0 {
+            return .landscapeRight // 0
+        } else if t.a == -1.0 && t.b == 0 && t.c == 0 && t.d == -1.0 {
+            return .landscapeLeft // 180
+        } else {
+            return .landscapeRight
+        }
+    }
+    
 }

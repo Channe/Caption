@@ -113,6 +113,8 @@ class CaptureController: NSObject {
             if captureSession.canAddInput(input){
                 captureSession.addInput(input)
                 self.activeInput = input
+            } else {
+                print("Error setting device video input")
             }
         } catch {
             print("Error settings device input: \(error)")
@@ -125,6 +127,8 @@ class CaptureController: NSObject {
             let micInput = try AVCaptureDeviceInput(device: microphone!)
             if captureSession.canAddInput(micInput){
                 captureSession.addInput(micInput)
+            } else {
+                print("Error setting device audio input")
             }
         } catch {
             print("Error setting device audio input: \(String(describing: error.localizedDescription))")
