@@ -34,6 +34,8 @@ class VideoPlayerViewController: UIViewController {
         stack.axis = .horizontal
         stack.distribution = .fill
         stack.isHidden = false
+        
+        stack.addBackground(color: TTBlackColor(0.35))
         return stack
     }()
     
@@ -73,8 +75,6 @@ class VideoPlayerViewController: UIViewController {
             // 显示字幕
             let naturalTimeScale = self.playerController.naturalTimeScale
             if let segmentsArray = segmentsArray,
-//               if let segments = segments,
-//               let items = SubtitleItem.subtitles(of: segments, naturalTimeScale: naturalTimeScale) {
                let items = SubtitleItem.subtitles(segmentsArray: segmentsArray, naturalTimeScale: naturalTimeScale) {
 
                 let font = TTFontB(26)

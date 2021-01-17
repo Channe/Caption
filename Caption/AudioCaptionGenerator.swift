@@ -153,10 +153,10 @@ class AudioCaptionGenerator: NSObject {
             var isFinal = false
             
             if let result = result {
-                let string = result.bestTranscription.formattedString
+//                let string = result.bestTranscription.formattedString
                 isFinal = result.isFinal
-                print("Text --------:")
-                print(string)
+//                print("Text --------:")
+//                print(string)
             }
             
             if error != nil || isFinal {
