@@ -48,10 +48,10 @@ class AudioCaptionGenerator: NSObject {
                     break
                 case .notDetermined:
                     break
-                case .denied:
-                    SysFunc.openAppSettings()
-                case .restricted:
-                    SysFunc.openAppSettings()
+                case .denied, .restricted:
+                    Toast.showTips("Please open speech recognizer auth") {
+                        SysFunc.openAppSettings()
+                    }
                 @unknown default:
                     break
                 }

@@ -65,7 +65,45 @@ class CaptureController: NSObject {
         view.layer.insertSublayer(self.previewLayer, at: 0)
     }
     
+    private func requestAccess() {
+        
+        let group = DispatchGroup()
+        
+        var videoAuth = true
+        group.enter()
+        AVCaptureDevice.requestAccess(for: .video) { (ok) in
+            videoAuth = ok
+            group.leave()
+        }
+        
+        var audioAuth = true
+        group.enter()
+        AVCaptureDevice.requestAccess(for: .audio) { (ok) in
+            audioAuth = ok
+            group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            if videoAuth == false || audioAuth == false {
+                var tips = "Please open camera and microphone auth"
+                
+                if videoAuth == false && audioAuth == true {
+                    tips = "Please open camera auth"
+                } else if videoAuth == true && audioAuth == false {
+                    tips = "Please open microphone auth"
+                }
+                
+                Toast.showTips(tips) {
+                    SysFunc.openAppSettings()
+                }
+            }
+        }
+        
+    }
+    
     private func setupSession() {
+        
+        requestAccess()
         
         // 默认是前置摄像头
         let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)

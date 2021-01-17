@@ -36,7 +36,7 @@ struct Toast {
     }()
     
     private static var tipsLabel:UILabel = {
-        let label = TTLabel(font: TTFontM(12), color: TTColor("#C5C5C7"), alignment: .center)
+        let label = TTLabel(font: TTFontM(22), color: TTColor("#C5C5C7"), alignment: .center)
         label.numberOfLines = 10
         label.lineBreakMode = .byWordWrapping
         label.layer.cornerRadius = 4
@@ -46,6 +46,12 @@ struct Toast {
         
         return label
     }()
+    
+    static func showTips(_ msg:String, duration:Double = 2, execute: () -> Void) {
+        self.showTips(msg, duration: duration)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: execute)
+    }
     
     static func showTips(_ msg:String, duration:Double = 2) {
         DispatchQueue.main.async {
