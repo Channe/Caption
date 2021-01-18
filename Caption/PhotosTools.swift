@@ -15,18 +15,19 @@ class PhotosTools {
         
     }
 
-    static func saveVideoToAlbum(fromURL: URL) {
+    static func saveVideoToAlbum(fromURL: URL, completion: ((Bool) -> Void)? = nil) {
         
         PHPhotoLibrary.requestAuthorization { (auth) in
             
             DispatchQueue.main.async {
                 switch auth {
-                
                 case .notDetermined:
                     break
                 case .restricted:
+                    completion?(false)
                     SysFunc.openAppSettings()
                 case .denied:
+                    completion?(false)
                     SysFunc.openAppSettings()
                 case .authorized:
                     PHPhotoLibrary.shared().performChanges {
@@ -35,9 +36,10 @@ class PhotosTools {
                         if error != nil {
                             print("saveVideoToAlbum error:\(error!)")
                         }
-                        Toast.showTips("Save to album \(success ? "sucess" : "failed")")
+                        completion?(success)
                     }
                 case .limited:
+                    completion?(false)
                     SysFunc.openAppSettings()
                 @unknown default:
                     break

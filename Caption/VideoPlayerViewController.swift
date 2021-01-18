@@ -156,21 +156,20 @@ class VideoPlayerViewController: UIViewController {
             }
         }
 
-        Toast.showTips("exporting...")
-        Toast.showLoading()
+        Toast.showLoading(isAllShowing:true)
         
         self.playerController.exportVideo(URL: outputURL) { (result) in
-            Toast.hideLoading()
             switch result {
-            
             case .success(_):
                 // 沙盒文件保存到系统相册
-                Toast.showTips("export success.")
-                PhotosTools.saveVideoToAlbum(fromURL: outputURL)
+                PhotosTools.saveVideoToAlbum(fromURL: outputURL) { success in
+                    Toast.hideLoading()
+                    Toast.showTips("Save to album \(success ? "sucess" : "failed")")
+                }
                 break
             case .failure(_):
-                Toast.showTips("export failure.")
-
+                Toast.hideLoading()
+                Toast.showTips("Save failure.")
                 break
             }
         }
