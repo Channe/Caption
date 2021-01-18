@@ -76,13 +76,17 @@ class VideoPlayerViewController: UIViewController {
             let naturalTimeScale = self.playerController.naturalTimeScale
             if let segmentsArray = segmentsArray,
                let items = SubtitleItem.subtitles(segmentsArray: segmentsArray, naturalTimeScale: naturalTimeScale) {
-
-                let font = TTFontB(26)
-                let origin = CGPoint(x: 20, y: 360)
-                let array = items.map { (item) -> SubtitleItem in
-                    item.config(font: font, origin:origin)
-                    return item
-                }
+                
+                var style = SubtitleStyle()
+                style.font = TTFontB(20)
+                style.textColor = .yellow
+                style.backgroundColor = TTWhiteColor(0.35)
+                style.alignment = .center
+                style.leftMargin = 20
+                style.bottomMargin = 260
+                
+                let array = items.map { $0.config(style: style) }
+                
                 self.playerController.displaySubtitles(array)
             }
         }

@@ -9,19 +9,28 @@ import UIKit
 import AVFoundation
 import Speech
 
+struct SubtitleStyle {
+    
+    var font: UIFont = TTFontB(26)
+    var leftMargin: CGFloat = 20
+    var bottomMargin: CGFloat = 300
+    var textColor: UIColor = .white
+    var backgroundColor: UIColor = TTBlackColor(0.35)
+    var alignment: CATextLayerAlignmentMode = .left
+    
+}
+
 class SubtitleItem: NSObject {
     
     private(set) var text: String
     private(set) var timeRange: CMTimeRange
-
-    private(set) var font: UIFont = TTFontB(26)
     
     private(set) var textX: CGFloat = 20
     private(set) var textY: CGFloat = 360
-    
-    // 仔细设置字幕的 frame，以便播放时和导出时字幕位置一致
     private(set) var textXRate: CGFloat? = nil
     private(set) var textYRate: CGFloat? = nil
+    private(set) var textWHRate: CGFloat? = nil
+    private(set) var fontRate: CGFloat? = nil
     
     static func subtitles(segmentsArray: [[SFTranscriptionSegment]]?, naturalTimeScale: CMTimeScale) -> [SubtitleItem]? {
         guard let segmentsArray = segmentsArray else {
@@ -47,30 +56,6 @@ class SubtitleItem: NSObject {
         return subtitleItems
     }
     
-    static func subtitles(of segments: [SFTranscriptionSegment]?, naturalTimeScale: CMTimeScale) -> [SubtitleItem]? {
-        guard let segments = segments else {
-            return nil
-        }
-        // 指定个数单词组成一句字幕
-        let segmentsArray = segments.chunked(into: 6)
-        
-        var subtitleItems: [SubtitleItem]? = nil
-        
-        segmentsArray.forEach { (segs) in
-            let text = segs.reduce("") { $0 + " " + $1.substring }
-            let startTimestamp = segs.first!.timestamp
-            let endTimestamp = segs.last!.timestamp + segs.last!.duration
-            let duration = endTimestamp - startTimestamp
-            
-            if subtitleItems == nil {
-                subtitleItems = []
-            }
-            subtitleItems?.append(SubtitleItem(text: text, timestamp: startTimestamp, duration: duration, naturalTimeScale:naturalTimeScale))
-        }
-        
-        return subtitleItems
-    }
-    
     init(text: String, timestamp:TimeInterval, duration: TimeInterval, naturalTimeScale: CMTimeScale) {
         
         self.text = text
@@ -79,14 +64,24 @@ class SubtitleItem: NSObject {
         super.init()
     }
     
-    func config(font: UIFont, origin: CGPoint) {
-        self.font = font
-        self.textX = origin.x
-        self.textY = origin.y
+//    @discardableResult
+//    func config(font: UIFont, leftMargin: CGFloat, bottomMargin: CGFloat) -> Self {
+//        self.font = font
+//        self.leftMargin = leftMargin
+//        self.bottomMargin = bottomMargin
+//
+//        return self
+//    }
+    
+    private(set) var style = SubtitleStyle()
+    
+    @discardableResult
+    func config(style: SubtitleStyle) -> Self {
+        self.style = style
+        return self
     }
     
-    private(set) var textWHRate: CGFloat? = nil
-    private(set) var fontRate: CGFloat? = nil
+    //MARK: - CATextLayer
 
     /*
      字幕大小取决于三种尺寸：控件宽高，视频在控件上缩放之后的宽高，视频本身宽高
@@ -96,39 +91,47 @@ class SubtitleItem: NSObject {
     // 预览时，字幕宽高使用显示控件的宽高；
     func getDisplayLayer(displayWidth: CGFloat, displayHeight: CGFloat) -> CALayer {
         print(#function)
+                
+        let font = self.style.font
         
-        self.textXRate = self.textX / displayWidth
-        self.textYRate = self.textY / displayHeight
         // 字幕宽度固定，高度根据字体动态计算
         let textWidth = displayWidth - textX * 2
-        let textHeight = self.text.height(withConstrainedWidth: textWidth, font: self.font)
+        let textHeight = self.text.height(withConstrainedWidth: textWidth, font: font)
         self.textWHRate = textWidth / textHeight
+        
+        self.textX = self.style.leftMargin
+        self.textY = displayHeight - self.style.bottomMargin - textHeight
+        self.textXRate = self.textX / displayWidth
+        self.textYRate = self.textY / displayHeight
+
         let textFrame = CGRect(x: textX, y: textY, width: textWidth, height: textHeight)
 
-        self.fontRate = self.font.pointSize / textWidth
+        self.fontRate = self.style.font.pointSize / textWidth
         
-        return buildLayer(textFrame: textFrame, fontName: self.font.fontName, fontSize: self.font.pointSize)
+        return buildLayer(textFrame: textFrame, fontName: font.fontName, fontSize: font.pointSize)
     }
     
     // 导出时，字幕宽高使用视频本身的宽高；
     func getExportLayer(videoWidth: CGFloat, videoHeight: CGFloat) -> CALayer {
         print(#function)
         
+        let font = self.style.font
+
         let textX = videoWidth * self.textXRate!
         //TODO: qianlei 稍微有点偏下
         let textY = videoHeight * self.textYRate!
+        
         let textWidth = videoWidth - textX * 2
         let textHeight = textWidth / self.textWHRate!
         let textFrame = CGRect(x: textX, y: textY, width: textWidth, height: textHeight)
 
         let fontSize = textWidth * self.fontRate!
         
-        return buildLayer(textFrame: textFrame, fontName: self.font.fontName, fontSize: fontSize)
+        return buildLayer(textFrame: textFrame, fontName: font.fontName, fontSize: fontSize)
     }
     
     private func buildLayer(textFrame:CGRect, fontName: String, fontSize: CGFloat) -> CALayer {
         print("buildLayer textFrame:\(textFrame)")
-        print("buildLayer self.font:\(self.font)")
         print("buildLayer fontName:\(fontName)")
         print("buildLayer fontSize:\(fontSize)")
 
@@ -142,10 +145,15 @@ class SubtitleItem: NSObject {
         textLayer.string = self.text
         textLayer.frame = CGRect(origin: .zero, size: textFrame.size)
         print("textLayer.frame:\(textLayer.frame)")
-        textLayer.backgroundColor = TTBlackColor(0.35).cgColor
+
         textLayer.contentsScale = UIScreen.main.scale
         textLayer.isWrapped = true
-        textLayer.alignmentMode = .left
+
+        textLayer.foregroundColor = self.style.textColor.cgColor
+        textLayer.backgroundColor = self.style.backgroundColor.cgColor
+
+        textLayer.alignmentMode = self.style.alignment
+        
         // 动态设置 font 大小
         textLayer.font = CGFont(fontName as CFString)
         textLayer.fontSize = fontSize
