@@ -222,8 +222,8 @@ class AudioCaptionGenerator: NSObject {
                 let length = separtor - prevSepartor
                 if length < 5 {
                     separtorIndexes.removeAll { $0 == separtor }
-                } else if length > 20 {
-                    // 给间隔大于20个单词的句子，添加分割点
+                } else if length > 15 {
+                    // 给间隔大于15个单词的句子，添加分割点
                     let count: Int = length / 10
                     for times in 1...count {
                         // 直接添加，然后重新排序，因为肯定是递增数组
@@ -233,37 +233,7 @@ class AudioCaptionGenerator: NSObject {
             }
         }
         
-        // 重新排序，因为肯定是递增数组
-        separtorIndexes.sort(by:<)
-        
-        // 按照语气停顿处 index 开始断句
-        var subSegmentsArray = [[SFTranscriptionSegment]]()
-        for _ in 0...separtorIndexes.count {
-            subSegmentsArray.append([SFTranscriptionSegment]())
-        }
-        separtorIndexes.forEach({ (separtor) in
-            let index = separtorIndexes.firstIndex(of: separtor)!
-            if index == separtorIndexes.count - 1 {
-                if separtorIndexes.count == 1 {
-                    subSegmentsArray[index] = Array(segments[...separtor])
-                    let subSegmentsLast = Array(segments[separtor+1..<segments.count])
-                    subSegmentsArray[index+1] = subSegmentsLast
-                } else {
-                    let prevSpartor = separtorIndexes[index - 1]
-                    let subSegments = Array(segments[prevSpartor+1...separtor])
-                    subSegmentsArray[index] = subSegments
-                    let subSegmentsLast = Array(segments[separtor+1..<segments.count])
-                    subSegmentsArray[index+1] = subSegmentsLast
-                }
-            } else if index == 0 {
-                let subSegments = Array(segments[0...separtor])
-                subSegmentsArray[index] = subSegments
-            } else {
-                let prevSpartor = separtorIndexes[index - 1]
-                let subSegments = Array(segments[prevSpartor+1...separtor])
-                subSegmentsArray[index] = subSegments
-            }
-        })
+        let subSegmentsArray = segments.chunked(by: separtorIndexes)
         
         return subSegmentsArray
     }

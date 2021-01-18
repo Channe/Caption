@@ -177,14 +177,3 @@ class SubtitleItem: NSObject {
     }
     
 }
-
-//let numbers = Array(1...12)
-//let result = numbers.chunked(into: 5)
-//print(result) // [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12]]
-extension Array {
-    func chunked(into size: Int) -> [[Element]] {
-        return stride(from: 0, to: count, by: size).map {
-            Array(self[$0 ..< Swift.min($0 + size, count)])
-        }
-    }
-}
