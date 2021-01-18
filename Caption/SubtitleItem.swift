@@ -64,15 +64,6 @@ class SubtitleItem: NSObject {
         super.init()
     }
     
-//    @discardableResult
-//    func config(font: UIFont, leftMargin: CGFloat, bottomMargin: CGFloat) -> Self {
-//        self.font = font
-//        self.leftMargin = leftMargin
-//        self.bottomMargin = bottomMargin
-//
-//        return self
-//    }
-    
     private(set) var style = SubtitleStyle()
     
     @discardableResult

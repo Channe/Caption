@@ -80,7 +80,7 @@ class VideoPlayerViewController: UIViewController {
                 var style = SubtitleStyle()
                 style.font = TTFontB(20)
                 style.textColor = .yellow
-                style.backgroundColor = TTWhiteColor(0.35)
+//                style.backgroundColor = TTWhiteColor(0.35)
                 style.alignment = .center
                 style.leftMargin = 20
                 style.bottomMargin = 260
