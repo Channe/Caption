@@ -77,32 +77,38 @@ class SubtitleItem: NSObject {
     //MARK: - CATextLayer
 
     /*
-     字幕大小取决于三种尺寸：控件宽高，视频在控件上缩放之后的宽高，视频本身宽高
-     预览时，字幕宽高使用显示控件的宽高；
+     字幕大小取决于三种尺寸：控件宽高，视频在控件上缩放之后的宽高（视频显示宽高），视频本身宽高
+     预览时，字幕宽高使用视频显示的宽高；
      导出时，字幕宽高使用视频本身的宽高；
      */
-    // 预览时，字幕宽高使用显示控件的宽高；
-    func getDisplayLayer(displaySize: CGSize, videoPlayRect: CGRect) -> CALayer {
+    // 预览时，字幕宽高使用视频显示的宽高；
+    func getDisplayLayer(playerSize: CGSize, videoPlayRect: CGRect) -> CALayer {
         print(#function)
-                
-        let displayWidth = displaySize.width
-        let displayHeight = displaySize.height
         
+        let displayWidth = videoPlayRect.width
+        let displayHeight = videoPlayRect.height
+
         let font = self.style.font
         
+        // 字幕宽度
+        let textWidth = displayWidth - self.style.leftMargin * 2
         // 字幕宽度固定，高度根据字体动态计算
-        let textWidth = displayWidth - textX * 2
         let textHeight = self.text.height(withConstrainedWidth: textWidth, font: font)
+        // 字幕宽高比
         self.textWHRate = textWidth / textHeight
+        // 字体比例
+        self.fontRate = self.style.font.pointSize / textWidth
         
-        self.textX = self.style.leftMargin
+        // 计算字幕在视频控件上的 x
+        self.textX = videoPlayRect.minX + self.style.leftMargin
+        // 计算字幕在视频控件上的 x
         self.textY = videoPlayRect.maxY - self.style.bottomMargin - textHeight
-        self.textXRate = self.textX / displayWidth
-        self.textYRate = (self.textY - videoPlayRect.origin.y) / videoPlayRect.size.height
+        // 字幕 x 位置比例
+        self.textXRate = self.style.leftMargin / displayWidth
+        // 字幕 y 位置比例
+        self.textYRate = (self.textY - videoPlayRect.minY) / videoPlayRect.size.height
 
         let textFrame = CGRect(x: textX, y: textY, width: textWidth, height: textHeight)
-
-        self.fontRate = self.style.font.pointSize / textWidth
         
         return buildLayer(textFrame: textFrame, fontName: font.fontName, fontSize: font.pointSize)
     }
@@ -114,8 +120,6 @@ class SubtitleItem: NSObject {
         let videoWidth = videoRenderSize.width
         let videoHeight = videoRenderSize.height
         
-        let font = self.style.font
-
         let textX = videoWidth * self.textXRate!
         //TODO: qianlei 稍微有点偏下
         let textY = videoHeight * self.textYRate!
@@ -124,8 +128,9 @@ class SubtitleItem: NSObject {
         let textHeight = textWidth / self.textWHRate!
         let textFrame = CGRect(x: textX, y: textY, width: textWidth, height: textHeight)
 
+        let font = self.style.font
         let fontSize = textWidth * self.fontRate!
-        
+
         return buildLayer(textFrame: textFrame, fontName: font.fontName, fontSize: fontSize)
     }
     

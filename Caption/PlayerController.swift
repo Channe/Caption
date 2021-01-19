@@ -104,7 +104,7 @@ class PlayerController: NSObject {
 
         // 预览时，字幕宽高使用显示控件的宽高；
         self.subtitleItems.forEach { (subtitleItem) in
-            let subtitleLayer = subtitleItem.getDisplayLayer(displaySize: playerRect.size, videoPlayRect: videoRect)
+            let subtitleLayer = subtitleItem.getDisplayLayer(playerSize: playerRect.size, videoPlayRect: videoRect)
             
             let syncLayer = AVSynchronizedLayer(playerItem: self.playerItem)
             syncLayer.addSublayer(subtitleLayer)
