@@ -83,10 +83,9 @@ class SubtitleItem: NSObject {
      */
     // 预览时，字幕宽高使用视频显示的宽高；
     func getDisplayLayer(playerSize: CGSize, videoPlayRect: CGRect) -> CALayer {
-        print(#function)
+//        print(#function)
         
         let displayWidth = videoPlayRect.width
-        let displayHeight = videoPlayRect.height
 
         let font = self.style.font
         
@@ -115,7 +114,7 @@ class SubtitleItem: NSObject {
     
     // 导出时，字幕宽高使用视频本身的宽高；
     func getExportLayer(videoRenderSize: CGSize) -> CALayer {
-        print(#function)
+//        print(#function)
         
         let videoWidth = videoRenderSize.width
         let videoHeight = videoRenderSize.height
@@ -135,20 +134,20 @@ class SubtitleItem: NSObject {
     }
     
     private func buildLayer(textFrame:CGRect, fontName: String, fontSize: CGFloat) -> CALayer {
-        print("buildLayer textFrame:\(textFrame)")
-        print("buildLayer fontName:\(fontName)")
-        print("buildLayer fontSize:\(fontSize)")
+//        print("buildLayer textFrame:\(textFrame)")
+//        print("buildLayer fontName:\(fontName)")
+//        print("buildLayer fontSize:\(fontSize)")
 
         let parentLayer = CALayer()
         parentLayer.frame = textFrame
-        print("parentLayer.frame:\(parentLayer.frame)")
+//        print("parentLayer.frame:\(parentLayer.frame)")
         // 默认隐藏，通过淡入动画来显示
         parentLayer.opacity = 0.0
         
         let textLayer = CATextLayer()
         textLayer.string = self.text
         textLayer.frame = CGRect(origin: .zero, size: textFrame.size)
-        print("textLayer.frame:\(textLayer.frame)")
+//        print("textLayer.frame:\(textLayer.frame)")
 
         textLayer.contentsScale = UIScreen.main.scale
         textLayer.isWrapped = true
@@ -179,7 +178,7 @@ class SubtitleItem: NSObject {
         }
         animation.beginTime = start
         animation.duration = CMTimeGetSeconds(self.timeRange.duration)
-        print("animation.beginTime:\(animation.beginTime), animation.duration:\(animation.duration)")
+//        print("animation.beginTime:\(animation.beginTime), animation.duration:\(animation.duration)")
         
         animation.isRemovedOnCompletion = false
         

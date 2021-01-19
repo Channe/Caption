@@ -19,13 +19,10 @@ class AudioCaptionGenerator: NSObject {
     private var recognitionFileRequest: SFSpeechURLRecognitionRequest?
     
     private var recognitionTask: SFSpeechRecognitionTask?
-        
+    
     private let videoURL: URL
     
-    var finalResult: SFTranscription? = nil
-    var finalText: String {
-        return self.finalResult?.formattedString ?? ""
-    }
+    private var finalResult: SFTranscription? = nil
     
     var startClosure: CapturenGeneratorStartClosure?
     var finishClosure: CapturenGeneratorFinishClosure?
@@ -60,71 +57,6 @@ class AudioCaptionGenerator: NSObject {
         
     }
     
-    func start() {
-        self.recognitionTask?.cancel()
-        self.recognitionTask = nil
-                
-        guard FileManager.default.fileExists(atPath: self.videoURL.path) else {
-            print("no video file.")
-            return
-        }
-        
-        self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        
-        guard let recognitionRequest = self.recognitionRequest else {
-            return
-        }
-        
-        recognitionRequest.shouldReportPartialResults = true
-        
-        // 在线语音识别效果比离线更好
-        if #available(iOS 13, *) {
-            recognitionRequest.requiresOnDeviceRecognition = true
-        }
-        
-        let asset = AVAsset(url: self.videoURL)
-        AudioSampleDataProvider.loadAudioSampleBuffers(fromAsset: asset) { (buffers) in
-            guard let sampleBuffers = buffers else {
-                recognitionRequest.endAudio()
-                return
-            }
-            sampleBuffers.forEach({ (sampleBuffer) in
-                recognitionRequest.appendAudioSampleBuffer(sampleBuffer)
-            })
-        }
-        
-        self.recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest, resultHandler: { [weak self](result, error) in
-            guard let self = self else { return }
-            
-            var isFinal = false
-            
-            if let result = result {
-                let string = result.bestTranscription.formattedString
-                isFinal = result.isFinal
-                print("Text --------:")
-                print(string)
-            }
-            
-            if error != nil || isFinal {
-                print("speech recognizer...")
-                print(error?.localizedDescription ?? "speech recognizer is completed.")
-                
-                if result != nil {
-                    self.finalResult = result!.bestTranscription
-                }
-                
-                DispatchQueue.main.async {
-                    self.recognitionRequest?.endAudio()
-                    self.recognitionTask?.cancel()
-                    self.recognitionRequest = nil
-                    self.recognitionTask = nil
-                }
-                
-            }
-            
-        })
-    }
-    
     func startFromFile() {
         self.recognitionTask?.cancel()
         self.recognitionTask = nil
@@ -138,7 +70,8 @@ class AudioCaptionGenerator: NSObject {
         
         let recognitionRequest = self.recognitionFileRequest!
         
-//        recognitionRequest.shouldReportPartialResults = true
+        // 只需要最终结果，不需要中间结果
+        recognitionRequest.shouldReportPartialResults = false
         
         // 在线语音识别效果不一定比离线更好
 //        if #available(iOS 13, *) {
@@ -154,9 +87,8 @@ class AudioCaptionGenerator: NSObject {
             
             if let result = result {
                 isFinal = result.isFinal
-
             }
-            
+
             if error != nil || isFinal {
                 print("speech recognizer...")
                 print(error?.localizedDescription ?? "speech recognizer is completed.")
@@ -167,6 +99,7 @@ class AudioCaptionGenerator: NSObject {
                     print("Speech Final Result --------:")
                     print(string)
                 }
+
                 
                 DispatchQueue.main.async {
                     self.recognitionTask?.cancel()
@@ -175,9 +108,7 @@ class AudioCaptionGenerator: NSObject {
                     
                     // 切分句子
                     if let final = self.finalResult {
-                        let subSegmentsArray = self.split(transcription: final)
-                        
-                        self.finishClosure?(subSegmentsArray)
+                        self.finishClosure?(self.split(final))
                     } else {
                         self.finishClosure?(nil)
                     }
@@ -188,9 +119,9 @@ class AudioCaptionGenerator: NSObject {
         
     }
     
-    private func split(transcription final: SFTranscription) -> [[SFTranscriptionSegment]]? {
-        let averagePauseDuration = final.averagePauseDuration
-        let segments = final.segments
+    private func split(_ result: SFTranscription) -> [[SFTranscriptionSegment]]? {
+        let averagePauseDuration = result.averagePauseDuration
+        let segments = result.segments
         
         var pauseIndexes: [Array<Any>.Index]? = nil
         segments.forEach { (seg) in
@@ -234,9 +165,7 @@ class AudioCaptionGenerator: NSObject {
             }
         }
         
-        let subSegmentsArray = segments.chunked(by: separtorIndexes)
-        
-        return subSegmentsArray
+        return segments.chunked(by: separtorIndexes)
     }
     
 }
