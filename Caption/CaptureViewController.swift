@@ -347,29 +347,11 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
             Toast.hideLoading()
             return
         }
-        let presetName = AVAssetExportPresetHighestQuality
 
-        guard let session = AVAssetExportSession(asset: composition, presetName: presetName) else {
+        guard let session = VideoTools.buildExportSession(outputURL: URL(fileURLWithPath: savePath), composition: composition, asset: asset) else {
             print("AVAssetExportSession error")
-            Toast.hideLoading()
             return
         }
-        
-        let videoComposition = VideoTools.fixed(composition: composition,
-                                                assetOrientation: asset.videoOrientation)
-        if videoComposition.renderSize.width > 0 {
-            session.videoComposition = videoComposition
-        }
-        
-        session.shouldOptimizeForNetworkUse = true
-
-        if session.supportedFileTypes.contains(.mp4) {
-            session.outputFileType = .mp4
-        } else {
-            session.outputFileType = session.supportedFileTypes.first!
-        }
-
-        session.outputURL = URL(fileURLWithPath: savePath)
 
         session.exportAsynchronously {
             Toast.hideLoading()

@@ -131,13 +131,11 @@ class PlayerController: NSObject {
             return
         }
         
-        guard let session = self.buildExportSession(composition) else {
+        guard let session = VideoTools.buildExportSession(outputURL:URL, composition:composition, asset: self.asset, isVideoMirrored: self.isVideoMirrored, subtitleItems: self.subtitleItems) else {
             print("export video buildExportSession error")
             finish(.failure(.create))
             return
         }
-        
-        session.outputURL = URL
         
         self.session = session
         
@@ -166,67 +164,6 @@ class PlayerController: NSObject {
             }
         }
 
-    }
-    
-    private func buildExportSession(_ composition: AVMutableComposition) -> AVAssetExportSession? {
-        
-        let presetName = AVAssetExportPresetHighestQuality
-        
-        let presets = AVAssetExportSession.exportPresets(compatibleWith: composition)
-        guard presets.contains(presetName) else {
-            print("AVAssetExportSession cannot support \(presetName)")
-            return nil
-        }
-        guard let session = AVAssetExportSession(asset: composition, presetName: presetName) else {
-            print("AVAssetExportSession error")
-            return nil
-        }
-        session.shouldOptimizeForNetworkUse = true
-        
-        if session.supportedFileTypes.contains(.mp4) {
-            session.outputFileType = .mp4
-        } else {
-            session.outputFileType = session.supportedFileTypes.first!
-        }
-        
-        let videoComposition = VideoTools.fixed(composition: composition,
-                                                assetOrientation: self.asset.videoOrientation,
-                                                isVideoMirrored: self.isVideoMirrored)
-        if videoComposition.renderSize.width > 0 {
-            session.videoComposition = videoComposition
-        }
-
-        // 导出时加上字幕
-        if self.subtitleItems.count > 0 {
-            // 使用旋转之后的宽高
-            let renderSize = videoComposition.renderSize
-            let bounds = CGRect(origin: .zero, size: renderSize)
-            
-            let parentLayer = CALayer()
-            parentLayer.frame = bounds // 必须和视频尺寸相同
-            
-            let overlayLayer = CALayer()
-            overlayLayer.frame = bounds // 必须和视频尺寸相同
-            
-            parentLayer.addSublayer(overlayLayer)
-            parentLayer.isGeometryFlipped = true // 避免错位现象
-
-            // 处理多段字幕
-            self.subtitleItems.forEach { (subtitleItem) in
-                let subtitleLayer = subtitleItem.getExportLayer(videoRenderSize: renderSize)
-                
-                parentLayer.addSublayer(subtitleLayer)
-            }
-            
-            // 将合成的视频帧放在videoLayer中并渲染animationLayer以生成最终帧
-            let animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: overlayLayer, in: parentLayer)
-            
-            videoComposition.animationTool = animationTool
-            
-            session.videoComposition = videoComposition
-        }
-        
-        return session
     }
     
     //MARK: - KVO
