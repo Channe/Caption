@@ -125,13 +125,7 @@ class PlayerController: NSObject {
         
         self.session = nil
         
-        guard let composition = VideoTools.buildComposition(asset: self.asset) else {
-            print("export video buildComposition error")
-            finish(.failure(.create))
-            return
-        }
-        
-        guard let session = VideoTools.buildExportSession(outputURL:URL, composition:composition, asset: self.asset, isVideoMirrored: self.isVideoMirrored, subtitleItems: self.subtitleItems) else {
+        guard let session = VideoTools.buildExportSession(outputURL:URL, asset: self.asset, isVideoMirrored: self.isVideoMirrored, subtitleItems: self.subtitleItems) else {
             print("export video buildExportSession error")
             finish(.failure(.create))
             return

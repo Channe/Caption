@@ -334,21 +334,8 @@ class CaptureViewController: UIViewController, UIImagePickerControllerDelegate, 
                 print("cannot remove exist video file")
             }
         }
-        
-        let asset = AVAsset(url: videoURL)
-        guard asset.isExportable else {
-            print("cannot export,asset")
-            Toast.hideLoading()
-            return
-        }
-
-        guard let composition = VideoTools.buildComposition(asset: asset) else {
-            print("cannot export,composition")
-            Toast.hideLoading()
-            return
-        }
-
-        guard let session = VideoTools.buildExportSession(outputURL: URL(fileURLWithPath: savePath), composition: composition, asset: asset) else {
+                
+        guard let session = VideoTools.buildExportSession(outputURL: URL(fileURLWithPath: savePath), asset: AVAsset(url: videoURL)) else {
             print("AVAssetExportSession error")
             return
         }

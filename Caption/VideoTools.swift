@@ -163,6 +163,26 @@ class VideoTools {
         return session
     }
     
+    static func buildExportSession(outputURL: URL, asset: AVAsset, isVideoMirrored:Bool = false, subtitleItems: [SubtitleItem]? = nil) -> AVAssetExportSession? {
+        
+        guard asset.isExportable else {
+            print("cannot export,asset")
+            return nil
+        }
+        
+        guard let composition = VideoTools.buildComposition(asset: asset) else {
+            print("export video buildComposition error")
+            return nil
+        }
+        
+        guard let session = VideoTools.buildExportSession(outputURL: outputURL, composition:composition, asset: asset, isVideoMirrored: isVideoMirrored, subtitleItems: subtitleItems) else {
+            print("export video buildExportSession error")
+            return nil
+        }
+        
+        return session
+    }
+    
 }
 
 extension AVAsset {
