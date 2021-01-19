@@ -153,10 +153,8 @@ class AudioCaptionGenerator: NSObject {
             var isFinal = false
             
             if let result = result {
-//                let string = result.bestTranscription.formattedString
                 isFinal = result.isFinal
-//                print("Text --------:")
-//                print(string)
+
             }
             
             if error != nil || isFinal {
@@ -165,6 +163,9 @@ class AudioCaptionGenerator: NSObject {
                 
                 if result != nil {
                     self.finalResult = result!.bestTranscription
+                    let string = self.finalResult!.formattedString
+                    print("Speech Final Result --------:")
+                    print(string)
                 }
                 
                 DispatchQueue.main.async {

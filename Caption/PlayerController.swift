@@ -94,13 +94,17 @@ class PlayerController: NSObject {
     func displaySubtitles(_ subtitleItems: [SubtitleItem]) {
         self.subtitleItems = subtitleItems
         
-        let playerSize = self.playerView.bounds.size
+        // 播放器尺寸
+        let playerRect = self.playerView.frame
+        // 视频的实际播放尺寸
+        let videoRect = self.playerView.videoRect
         
+        print("playerRect:\(playerRect)")
+        print("videoRect:\(videoRect)")
+
         // 预览时，字幕宽高使用显示控件的宽高；
         self.subtitleItems.forEach { (subtitleItem) in
-            let subtitleLayer = subtitleItem
-                .getDisplayLayer(displayWidth: playerSize.width,
-                                 displayHeight: playerSize.height)
+            let subtitleLayer = subtitleItem.getDisplayLayer(displaySize: playerRect.size, videoPlayRect: videoRect)
             
             let syncLayer = AVSynchronizedLayer(playerItem: self.playerItem)
             syncLayer.addSublayer(subtitleLayer)
@@ -209,9 +213,8 @@ class PlayerController: NSObject {
 
             // 处理多段字幕
             self.subtitleItems.forEach { (subtitleItem) in
-                let subtitleLayer = subtitleItem
-                    .getExportLayer(videoWidth: renderSize.width,
-                                    videoHeight: renderSize.height)
+                let subtitleLayer = subtitleItem.getExportLayer(videoRenderSize: renderSize)
+                
                 parentLayer.addSublayer(subtitleLayer)
             }
             
@@ -252,7 +255,8 @@ class PlayerController: NSObject {
                 Toast.showTips("Failed to load video.")
                 return
             }
-            
+            print("videoRect:\(self.playerView.videoRect)")
+
             self.player.play()
         }
         

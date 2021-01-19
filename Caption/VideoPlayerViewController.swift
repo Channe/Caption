@@ -82,8 +82,8 @@ class VideoPlayerViewController: UIViewController {
                 style.textColor = .yellow
 //                style.backgroundColor = TTWhiteColor(0.35)
                 style.alignment = .center
-                style.leftMargin = 20
-                style.bottomMargin = 260
+                style.leftMargin = 26
+                style.bottomMargin = 26
                 
                 let array = items.map { $0.config(style: style) }
                 

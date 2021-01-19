@@ -12,8 +12,10 @@ import Speech
 struct SubtitleStyle {
     
     var font: UIFont = TTFontB(26)
+    /// 字幕和视频左边的边距
     var leftMargin: CGFloat = 20
-    var bottomMargin: CGFloat = 300
+    /// 字幕和视频底边的边距
+    var bottomMargin: CGFloat = 20
     var textColor: UIColor = .white
     var backgroundColor: UIColor = TTBlackColor(0.35)
     var alignment: CATextLayerAlignmentMode = .left
@@ -80,9 +82,12 @@ class SubtitleItem: NSObject {
      导出时，字幕宽高使用视频本身的宽高；
      */
     // 预览时，字幕宽高使用显示控件的宽高；
-    func getDisplayLayer(displayWidth: CGFloat, displayHeight: CGFloat) -> CALayer {
+    func getDisplayLayer(displaySize: CGSize, videoPlayRect: CGRect) -> CALayer {
         print(#function)
                 
+        let displayWidth = displaySize.width
+        let displayHeight = displaySize.height
+        
         let font = self.style.font
         
         // 字幕宽度固定，高度根据字体动态计算
@@ -91,9 +96,9 @@ class SubtitleItem: NSObject {
         self.textWHRate = textWidth / textHeight
         
         self.textX = self.style.leftMargin
-        self.textY = displayHeight - self.style.bottomMargin - textHeight
+        self.textY = videoPlayRect.maxY - self.style.bottomMargin - textHeight
         self.textXRate = self.textX / displayWidth
-        self.textYRate = self.textY / displayHeight
+        self.textYRate = (self.textY - videoPlayRect.origin.y) / videoPlayRect.size.height
 
         let textFrame = CGRect(x: textX, y: textY, width: textWidth, height: textHeight)
 
@@ -103,8 +108,11 @@ class SubtitleItem: NSObject {
     }
     
     // 导出时，字幕宽高使用视频本身的宽高；
-    func getExportLayer(videoWidth: CGFloat, videoHeight: CGFloat) -> CALayer {
+    func getExportLayer(videoRenderSize: CGSize) -> CALayer {
         print(#function)
+        
+        let videoWidth = videoRenderSize.width
+        let videoHeight = videoRenderSize.height
         
         let font = self.style.font
 
