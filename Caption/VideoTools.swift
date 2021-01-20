@@ -7,6 +7,13 @@
 
 import AVFoundation
 
+enum ExportResult {
+    case finish
+    case progress(Float)
+}
+
+typealias ExportVideoProgressClosure = (ExportResult) -> Void
+
 class VideoTools {
     
     static func buildComposition(asset: AVAsset) -> AVMutableComposition? {
@@ -181,6 +188,20 @@ class VideoTools {
         }
         
         return session
+    }
+    
+    static func monitorExport(_ session: AVAssetExportSession, progress:@escaping ExportVideoProgressClosure) {
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let status = session.status
+            if status == .exporting {
+                print("exporting progress:\(session.progress)")
+                progress(.progress(session.progress))
+                self.monitorExport(session, progress: progress)
+            } else {
+                progress(.finish)
+            }
+        }
     }
     
 }

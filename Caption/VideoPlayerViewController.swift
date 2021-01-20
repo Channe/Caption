@@ -50,6 +50,14 @@ class VideoPlayerViewController: UIViewController {
         
         return btn
     }()
+    
+    private lazy var progressView: LineProgressView = {
+        let view = LineProgressView()
+        view.bgColor = UIColor.blue
+        view.progressColor = UIColor.black
+        view.isHidden = true
+        return view
+    }()
 
     init(videoURL: URL, isVideoMirrored: Bool = false) {
         self.playerController = PlayerController(URL: videoURL, isVideoMirrored:isVideoMirrored)
@@ -58,6 +66,21 @@ class VideoPlayerViewController: UIViewController {
         self.captionGenerator = AudioCaptionGenerator(URL: URL(fileURLWithPath: savePath))
         
         super.init(nibName: nil, bundle: nil)
+        
+        self.playerController.progressClosure = { [weak self](result) in
+            guard let self = self else { return }
+            switch result {
+            
+            case .finish:
+                self.saveBtn.isEnabled = true
+                self.progressView.isHidden = true
+                self.progressView.progress = 0
+            case .progress(let progress):
+                self.saveBtn.isEnabled = false
+                self.progressView.isHidden = false
+                self.progressView.progress = CGFloat(progress)
+            }
+        }
         
         self.captionGenerator.startClosure = { [weak self] in
             guard let self = self else { return }
@@ -105,13 +128,13 @@ class VideoPlayerViewController: UIViewController {
         
         view.backgroundColor = .white
         
-        configPlayerViews()
+        configViews()
         
 //        self.captionGenerator.start()
         self.captionGenerator.startFromFile()
     }
     
-    private func configPlayerViews() {
+    private func configViews() {
         
         let playerView = self.playerController.playerView
         self.view.addSubview(playerView)
@@ -139,6 +162,15 @@ class VideoPlayerViewController: UIViewController {
             maker.top.equalToSuperview().offset(100)
             maker.height.equalTo(40)
         }
+        
+        self.view.addSubview(self.progressView)
+        self.progressView.snp.makeConstraints { (make) in
+            make.centerY.equalTo(self.saveBtn)
+            make.left.equalTo(20)
+            make.right.equalTo(self.saveBtn.snp.left).offset(-20)
+            make.height.equalTo(6)
+        }
+        
     }
     
     @objc private func failedRetryBtnAction() {
@@ -159,20 +191,16 @@ class VideoPlayerViewController: UIViewController {
                 print("cannot remove exist video file")
             }
         }
-
-        Toast.showLoading(isAllShowing:true)
         
         self.playerController.exportVideo(URL: outputURL) { (result) in
             switch result {
             case .success(_):
                 // 沙盒文件保存到系统相册
                 PhotosTools.saveVideoToAlbum(fromURL: outputURL) { success in
-                    Toast.hideLoading()
                     Toast.showTips("Save to album \(success ? "sucess" : "failed")")
                 }
                 break
             case .failure(_):
-                Toast.hideLoading()
                 Toast.showTips("Save failure.")
                 break
             }

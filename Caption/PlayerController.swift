@@ -45,6 +45,7 @@ class PlayerController: NSObject {
     }
 
     private(set) var isVideoMirrored = false
+    var progressClosure: ExportVideoProgressClosure? = nil
     
     init(URL: URL, repeats: Bool = true, isVideoMirrored: Bool = false) {
         self.asset = AVAsset(url: URL)
@@ -132,6 +133,10 @@ class PlayerController: NSObject {
         }
         
         self.session = session
+        
+        if let progress = self.progressClosure {
+            VideoTools.monitorExport(session, progress: progress)
+        }
         
         session.exportAsynchronously {
             DispatchQueue.main.async {
