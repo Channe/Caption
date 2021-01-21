@@ -91,6 +91,7 @@ class PlayerController: NSObject {
     
     // 播放时增加字幕，处理多段字幕
     private var subtitleItems: [SubtitleItem] = []
+    private let subtitleService = SubtitleService()
     
     func displaySubtitles(_ subtitleItems: [SubtitleItem]) {
         self.subtitleItems = subtitleItems
@@ -105,7 +106,7 @@ class PlayerController: NSObject {
 
         // 预览时，字幕宽高使用显示控件的宽高；
         self.subtitleItems.forEach { (subtitleItem) in
-            let subtitleLayer = subtitleItem.getDisplayLayer(playerSize: playerRect.size, videoPlayRect: videoRect)
+            let subtitleLayer = self.subtitleService.getDisplayLayer(item:subtitleItem, playerSize: playerRect.size, videoPlayRect: videoRect)
             
             let syncLayer = AVSynchronizedLayer(playerItem: self.playerItem)
             syncLayer.addSublayer(subtitleLayer)

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		719BD6B46D3E7E2FB78E977E /* Pods_Caption.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BDC63231BADF122FF75D21F /* Pods_Caption.framework */; };
 		971212F625B8364400C25E98 /* LineProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971212F525B8364300C25E98 /* LineProgressView.swift */; };
+		9712130A25B9454600C25E98 /* SubtitleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9712130925B9454600C25E98 /* SubtitleService.swift */; };
 		97251EF225B57BCE005E63B4 /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97251EF125B57BCE005E63B4 /* ArrayExtension.swift */; };
 		9771DBA025AC27F200EA7239 /* CaptureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */; };
 		9771DBA825AC291600EA7239 /* VideoPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */; };
@@ -54,6 +55,7 @@
 		57C2D5CFF6123D3FDD8986FE /* Pods-Caption.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Caption.debug.xcconfig"; path = "Target Support Files/Pods-Caption/Pods-Caption.debug.xcconfig"; sourceTree = "<group>"; };
 		716D58AFE78F458173831528 /* Pods-Caption.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Caption.release.xcconfig"; path = "Target Support Files/Pods-Caption/Pods-Caption.release.xcconfig"; sourceTree = "<group>"; };
 		971212F525B8364300C25E98 /* LineProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineProgressView.swift; sourceTree = "<group>"; };
+		9712130925B9454600C25E98 /* SubtitleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleService.swift; sourceTree = "<group>"; };
 		97251EF125B57BCE005E63B4 /* ArrayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
 		9771DB9F25AC27F200EA7239 /* CaptureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureViewController.swift; sourceTree = "<group>"; };
 		9771DBA725AC291600EA7239 /* VideoPlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewController.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				9771DBDC25AC74B000EA7239 /* PlayerController.swift */,
 				9771DC8C25B28BF100EA7239 /* VideoTools.swift */,
 				9771DBD725AC5ACE00EA7239 /* PlayerView.swift */,
+				9712130925B9454600C25E98 /* SubtitleService.swift */,
 				9771DC5125B072FC00EA7239 /* SubtitleItem.swift */,
 				9771DBE125AC934B00EA7239 /* SampleDataProvider.swift */,
 				9771DBEB25ACAB6600EA7239 /* AudioCaptionGenerator.swift */,
@@ -375,6 +378,7 @@
 				9771DBDD25AC74B000EA7239 /* PlayerController.swift in Sources */,
 				9771DBD825AC5ACE00EA7239 /* PlayerView.swift in Sources */,
 				9771DBCE25AC3A5D00EA7239 /* UIFunc.swift in Sources */,
+				9712130A25B9454600C25E98 /* SubtitleService.swift in Sources */,
 				9771DBA025AC27F200EA7239 /* CaptureViewController.swift in Sources */,
 				9771DBF125AE154C00EA7239 /* CaptureController.swift in Sources */,
 				971212F625B8364400C25E98 /* LineProgressView.swift in Sources */,

@@ -150,9 +150,11 @@ class VideoTools {
             parentLayer.addSublayer(overlayLayer)
             parentLayer.isGeometryFlipped = true // 避免错位现象
             
+            let subtitleService = SubtitleService()
+
             // 处理多段字幕
             subtitles.forEach { (subtitleItem) in
-                let subtitleLayer = subtitleItem.getExportLayer(videoRenderSize: renderSize)
+                let subtitleLayer = subtitleService.getExportLayer(item:subtitleItem, videoRenderSize: renderSize)
                 
                 parentLayer.addSublayer(subtitleLayer)
             }

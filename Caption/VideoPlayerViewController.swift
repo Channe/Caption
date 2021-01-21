@@ -98,15 +98,15 @@ class VideoPlayerViewController: UIViewController {
             // 显示字幕
             let naturalTimeScale = self.playerController.naturalTimeScale
             if let segmentsArray = segmentsArray,
-               let items = SubtitleItem.subtitles(segmentsArray: segmentsArray, naturalTimeScale: naturalTimeScale) {
+               let items = SubtitleService.subtitles(segmentsArray: segmentsArray, naturalTimeScale: naturalTimeScale) {
                 
                 var style = SubtitleStyle()
                 style.font = TTFontB(20)
-                style.textColor = .yellow
+                style.textColor = .white
 //                style.backgroundColor = TTWhiteColor(0.35)
                 style.alignment = .center
                 style.leftMargin = 26
-                style.bottomMargin = 26
+                style.bottomMargin = 88
                 
                 let array = items.map { $0.config(style: style) }
                 
