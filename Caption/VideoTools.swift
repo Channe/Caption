@@ -50,6 +50,12 @@ class VideoTools {
     static func fixed(composition: AVMutableComposition, assetOrientation: AVCaptureVideoOrientation, isVideoMirrored:Bool = false) -> AVMutableVideoComposition {
         
         let videoComposition = AVMutableVideoComposition(propertiesOf: composition)
+
+        var renderSize = videoComposition.renderSize
+        // https://stackoverflow.com/a/45013962
+        renderSize = CGSize(width: floor(renderSize.width / 16) * 16, height: floor(renderSize.height / 16) * 16)
+        
+        videoComposition.renderSize = renderSize
         
         guard assetOrientation != .landscapeRight else {
             return videoComposition
